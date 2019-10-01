@@ -8,9 +8,9 @@ namespace CMC
     class SourceFile
     {
         private StreamReader StreamReader { get; set; }
-        public SourceFile(string path)
+        public SourceFile( string path )
         {
-            StreamReader = File.OpenText(path);
+            StreamReader = File.OpenText( path );
         }
 
         public char GetChar()

@@ -1,0 +1,44 @@
+#structs
+kebab myKebab 
+[
+	inty maInt;
+]
+
+myKebab myNamedKebab;
+myNamedKebab.maInt = 123;
+
+#define a function
+function multiply takes inty a, inty b givesBack inty
+[
+	giveBack a * b ;
+]
+
+# function call
+inty result = call multiply with 1, 2;
+
+# while loop
+loop aye or nay
+[
+	stopTheLoop;
+]
+
+# if statement
+if aye or nay
+[
+	
+]
+
+# function definition that has void as a return type.
+function hello takes inty a givesBack nothing
+[
+call print with a;
+
+	giveBack;
+]
+
+# function definition that takes no parameters and returns void.
+function hello2 takes nothing givesBack nothing
+[
+	inty input = call tinrp with nothing;
+call print with input;
+]
