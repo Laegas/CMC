@@ -1,0 +1,4 @@
+# declaration
+myKebab myNamedKebab;
+# kebab access
+myNamedKebab.maInt = 123;

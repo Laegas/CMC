@@ -1,0 +1,5 @@
+#structs
+kebab myKebab 
+[
+	inty maInt;
+]
