@@ -7,13 +7,8 @@ namespace CMC_UnitTest
 {
     public class ScannerUnitTest
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
-        public void Scanner_Kebab()
+        public void Scanner_KebabDefinition()
         {
             // Arrange
             var expectedTokens = new List<Token>()
@@ -29,7 +24,7 @@ namespace CMC_UnitTest
             };
 
             // Act
-            var tokens = Runner(@"examples/kebab.pudekcuf");
+            var tokens = Runner(@"examples/kebabDefinition.pudekcuf");
             
             // Assert
             Assert.AreEqual(8, tokens.Count);
@@ -62,6 +57,67 @@ namespace CMC_UnitTest
             Assert.AreEqual(expectedTokens, tokens);
         }
 
+        [Test]
+        public void Scanner_FunctionDefinition()
+        {
+            // Arrange
+            var expectedTokens = new List<Token>()
+            {
+                new Token("function", Token.TokenType.FUNCTION),
+                new Token("multiply", Token.TokenType.IDENTIFIER),
+                new Token("takes", Token.TokenType.TAKES),
+                new Token("inty", Token.TokenType.VARIABLE_TYPE),
+                new Token("a", Token.TokenType.IDENTIFIER),
+                new Token(",", Token.TokenType.COMMA),
+                new Token("inty", Token.TokenType.VARIABLE_TYPE),
+                new Token("b", Token.TokenType.IDENTIFIER),
+                new Token("givesBack", Token.TokenType.GIVES_BACK),
+                new Token("inty", Token.TokenType.VARIABLE_TYPE),
+                new Token("[", Token.TokenType.LEFT_SQUARE),
+                new Token("giveBack", Token.TokenType.GIVE_BACK),
+                new Token("a", Token.TokenType.IDENTIFIER),
+                new Token("*", Token.TokenType.INTY_OPERATOR),
+                new Token("b", Token.TokenType.IDENTIFIER),
+                new Token(";", Token.TokenType.SEMICOLON),
+                new Token("]", Token.TokenType.RIGHT_SQUARE),
+                new Token("", Token.TokenType.END_OF_TEXT),
+            };
+
+            // Act
+            var tokens = Runner(@"examples/functionDefinition.pudekcuf");
+            
+            // Assert
+            Assert.AreEqual(18, tokens.Count);
+            Assert.AreEqual(expectedTokens, tokens);
+        }
+
+        [Test]
+        public void Scanner_FunctionCall()
+        {
+            // Arrange
+            var expectedTokens = new List<Token>()
+            {
+                new Token("inty", Token.TokenType.VARIABLE_TYPE),
+                new Token("result", Token.TokenType.IDENTIFIER),
+                new Token("=", Token.TokenType.ASSIGNMENT),
+                new Token("call", Token.TokenType.CALL),
+                new Token("multiply", Token.TokenType.IDENTIFIER),
+                new Token("with", Token.TokenType.WITH),
+                new Token("1", Token.TokenType.INTY_LITERAL),
+                new Token(",", Token.TokenType.COMMA),
+                new Token("2", Token.TokenType.INTY_LITERAL),
+                new Token(";", Token.TokenType.SEMICOLON),
+                new Token("", Token.TokenType.END_OF_TEXT),
+            };
+
+            // Act
+            var tokens = Runner(@"examples/functionCall.pudekcuf");
+            
+            // Assert
+            Assert.AreEqual(11, tokens.Count);
+            Assert.AreEqual(expectedTokens, tokens);
+        }
+
         private List<Token> Runner(string pathFile)
         {
             var sourceFile = new SourceFile(pathFile);
@@ -78,15 +134,11 @@ namespace CMC_UnitTest
                 }
             }
 
-            return tokens;
-        }
-
-        private void PrintTokens(List<Token> tokens)
-        {
             foreach (var token in tokens)
             {
                 Console.WriteLine(token);
             }
+            return tokens;
         }
     }
 }

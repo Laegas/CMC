@@ -1,0 +1,5 @@
+# function definition
+function multiply takes inty a, inty b givesBack inty
+[
+	giveBack a * b ;
+]
