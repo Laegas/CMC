@@ -12,6 +12,7 @@ namespace CMC
 
             var parser = new Parser(sourceFile);
             parser.ParseProgram();
+            Console.WriteLine( "\n\nFinished parsing file" );
             //while( true )
             //{
             //    parser.

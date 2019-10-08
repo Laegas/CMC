@@ -37,13 +37,13 @@ function multiply takes inty a, inty b givesBack inty
 # function definition that has void as a return type.
 function hello takes inty a givesBack nothing
 [
-call print with a;
+	call print with a;
 
 	giveBack;
 ]
 
 # function definition that takes no parameters and returns void.
-function hello2 takes nothing givesBack nothing
+function helloTwo takes nothing givesBack nothing
 [
 	inty input = call tinrp with nothing;
 call print with input;

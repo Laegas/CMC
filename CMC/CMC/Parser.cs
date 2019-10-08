@@ -37,8 +37,7 @@ namespace CMC
                     ParseVarriableDeclaration();
                     Accept(Token.TokenType.SEMICOLON);
                     break;
-                case Token.TokenType.FUNCTION:
-                case Token.TokenType.LEFT_SQUARE:
+                case Token.TokenType.FUNCTION: // function declaration
                     //Function declaration
                     ParseFunctionDeclaration();
                     break;
@@ -81,8 +80,8 @@ namespace CMC
             Accept(Token.TokenType.LEFT_SQUARE);
             ParseStatements();
             Accept(Token.TokenType.RIGHT_SQUARE);
-
         }
+
         private void ParseStruct()
         {
 
@@ -133,7 +132,9 @@ namespace CMC
                     ParseExpression();
                     Accept(Token.TokenType.RIGHT_PAREN);
                     break;
-
+                case Token.TokenType.CALL:
+                    ParseFunctionCall();
+                    break;
                 default:
                     if (currentToken.TheTokenType.Equals(Token.TokenType.USER_CREATABLE_ID))
                     {
@@ -141,31 +142,56 @@ namespace CMC
                     }
                     else
                     {
-                        //accept literal
-                        if (currentToken.TheTokenType.Equals(Token.TokenType.BOOLY_LITERAL))
-                        {
-                            Accept(Token.TokenType.BOOLY_LITERAL);
-                        }
-                        else
-                        {
-                            Accept(Token.TokenType.INTY_LITERAL);
-                        }
+                        ParseLiteral();
                     }
 
-                    if (currentToken.TheTokenType.Equals(Token.TokenType.INTY_OPERATOR))
+                    if( CurrentTokenIsOperator() )
                     {
-                        Accept(Token.TokenType.INTY_OPERATOR);
-                        ParseExpression();
-                    }
-                    else if (currentToken.TheTokenType.Equals(Token.TokenType.BOOLY_OPERATOR))
-                    {
-                        Accept(Token.TokenType.BOOLY_OPERATOR);
+                        ParseOperator();
                         ParseExpression();
                     }
                     break;
             }
 
         }
+        private bool CurrentTokenIsOperator()
+        {
+            return currentToken.TheTokenType.Equals( Token.TokenType.INTY_OPERATOR )
+                || currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_OPERATOR )
+                ;
+        }
+
+        private void ParseOperator()
+        {
+            if( currentToken.TheTokenType.Equals( Token.TokenType.INTY_OPERATOR ) )
+            {
+                Accept( Token.TokenType.INTY_OPERATOR );
+            }
+            else if( currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_OPERATOR ) )
+            {
+                Accept( Token.TokenType.BOOLY_OPERATOR );
+            }
+        }
+
+        //private bool CurrentTokenIsLiteral()
+        //{
+        //    return currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_LITERAL )
+        //        || currentToken.TheTokenType.Equals( Token.TokenType.INTY_LITERAL )
+        //        ;
+        //}
+        private void ParseLiteral()
+        {
+            if( currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_LITERAL ) )
+            {
+                Accept( Token.TokenType.BOOLY_LITERAL );
+            }
+            else
+            {
+                Accept( Token.TokenType.INTY_LITERAL );
+            }
+        }
+        
+
         private void ParseVarriableDeclarationList()
         {
             while (currentToken.TheTokenType.Equals(Token.TokenType.VARIABLE_TYPE))
@@ -203,7 +229,7 @@ namespace CMC
             switch (currentToken.TheTokenType)
             {
                 case Token.TokenType.LEFT_PAREN:
-                case Token.TokenType.IDENTIFIER:
+                case Token.TokenType.USER_CREATABLE_ID:
                 case Token.TokenType.INTY_LITERAL:
                 case Token.TokenType.BOOLY_LITERAL:
                     return true;
@@ -215,12 +241,12 @@ namespace CMC
             switch (currentToken.TheTokenType)
             {
                 case Token.TokenType.GIVE_BACK:
-                    Accept(Token.TokenType.GIVES_BACK);
+                    Accept(Token.TokenType.GIVE_BACK);
                     if (CurrentTokenStartOfExpression())
                     {
                         ParseExpression();
-                        Accept(Token.TokenType.SEMICOLON);
                     }
+                    Accept( Token.TokenType.SEMICOLON );
                     break;
                 case Token.TokenType.STOP_THE_LOOP:
                     Accept(Token.TokenType.STOP_THE_LOOP);
@@ -241,11 +267,8 @@ namespace CMC
                     Accept(Token.TokenType.RIGHT_SQUARE);
                     break;
                 case Token.TokenType.CALL:
-                    Accept(Token.TokenType.CALL);
-                    Accept(Token.TokenType.USER_CREATABLE_ID);
-                    Accept(Token.TokenType.WITH);
-                    ParseArgumentList();
-                    Accept(Token.TokenType.SEMICOLON);
+                    ParseFunctionCall();
+                    Accept( Token.TokenType.SEMICOLON );
                     break;
                 case Token.TokenType.USER_CREATABLE_ID:
                     ParseIdentifier();
@@ -265,15 +288,36 @@ namespace CMC
 
         private void ParseArgumentList()
         {
-            ParseIdentifier();
-            while (currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
+            if( CurrentTokenStartOfIdentifier() )
             {
-                Accept(Token.TokenType.COMMA);
                 ParseIdentifier();
+                while( currentToken.TheTokenType.Equals( Token.TokenType.COMMA ) )
+                {
+                    Accept( Token.TokenType.COMMA );
+                    ParseIdentifier();
+                }
             }
+            else
+            {
+                Accept( Token.TokenType.NOTHING );
+            }
+            
 
         }
 
+        private void ParseFunctionCall()
+        {
+            Accept( Token.TokenType.CALL );
+            Accept( Token.TokenType.USER_CREATABLE_ID );
+            Accept( Token.TokenType.WITH );
+            ParseArgumentList();
+        }
+
+        private bool CurrentTokenStartOfIdentifier()
+        {
+            return currentToken.TheTokenType.Equals( Token.TokenType.USER_CREATABLE_ID )
+                ;
+        }
         private void ParseIdentifier()
         {
             Accept(Token.TokenType.USER_CREATABLE_ID);
@@ -293,7 +337,7 @@ namespace CMC
             }
             else
             {
-                Console.WriteLine("The parser failed, got token:" + currentToken + ", but expected token of type: " + tokenType.ToString());
+                Console.WriteLine("The parser failed, got token:" + currentToken.TheTokenType + ", but expected token of type: " + tokenType.ToString());
             }
         }
     }
