@@ -1,18 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static CMC.Token;
 
 namespace CMC
 {
-    public class Scanner
+    class Scanner
     {
         private SourceFile sourceFile;
-        private char _currentChar;
+        private char currentChar;
 
-        public Scanner( SourceFile sourceFile )
+        public Scanner( SourceFile sourcerFile )
         {
-            this.sourceFile = sourceFile;
+            this.sourceFile = sourcerFile;
             ReadNextCharacterIntoCurrentChar();
         }
 
@@ -21,12 +22,12 @@ namespace CMC
         {
             try
             {
-                _currentChar = sourceFile.GetChar();
+                currentChar = sourceFile.GetChar();
             }
-            catch(EndOfStreamException)
+            catch( EndOfStreamException ex )
             {
                 //return end of file char
-                _currentChar = '\0';
+                currentChar = '\0';
             }
         }
 
@@ -42,17 +43,17 @@ namespace CMC
             };
 
             var garbageCharSet = new HashSet<char>( chars );
-            while( garbageCharSet.Contains( _currentChar ) )
+            while( garbageCharSet.Contains( currentChar ) )
             {
-                if( '#' == _currentChar )
+                if( '#' == currentChar )
                 {
                     //read till new line
-                    while( '\n' != _currentChar && '\0' != _currentChar )
+                    while( '\n' != currentChar && '\0' != currentChar )
                     {
                         ReadNextCharacterIntoCurrentChar();
                     }
 
-                    if( '\n' == _currentChar )
+                    if( '\n' == currentChar )
                     {
                         ReadNextCharacterIntoCurrentChar(); // removes the '\n'
                     }
@@ -68,7 +69,10 @@ namespace CMC
         {
             var stringBuilder = new StringBuilder();
 
-            var listOfOneCharTokens = new List<TokenType>( new [] {
+            TokenType tokenType = TokenType.NOT_YET_ASSIGNED;
+
+
+            var listOfOneCharTokens = new List<TokenType>( new TokenType[] {
                 TokenType.INTY_OPERATOR,
                 TokenType.DOT,
                 TokenType.ASSIGNMENT,
@@ -83,9 +87,9 @@ namespace CMC
 
             foreach( var item in listOfOneCharTokens )
             {
-                if( Token.CharIsTokenType( item, _currentChar ) )
+                if( Token.CharIsTokenType( item, currentChar ) )
                 {
-                    var oldChar = _currentChar;
+                    var oldChar = currentChar;
 
                     ReadNextCharacterIntoCurrentChar();
                     return new Token( oldChar.ToString(), item );
@@ -93,11 +97,11 @@ namespace CMC
             }
 
             // is inty literal?
-            if( IsDigit( _currentChar ) )
+            if( IsDigit( currentChar ) )
             {
-                while( IsDigit( _currentChar ) )
+                while( IsDigit( currentChar ) )
                 {
-                    stringBuilder.Append( _currentChar );
+                    stringBuilder.Append( currentChar );
                     ReadNextCharacterIntoCurrentChar();
                 }
 
@@ -105,16 +109,16 @@ namespace CMC
             }
 
             //should now be an identifyer
-            if( IsLetter( _currentChar ) )
+            if( IsLetter( currentChar ) )
             {
-                while( IsLetter( _currentChar ) )
+                while( IsLetter( currentChar ) )
                 {
-                    stringBuilder.Append( _currentChar );
+                    stringBuilder.Append( currentChar );
                     ReadNextCharacterIntoCurrentChar();
                 }
 
                 string identifierSpelling = stringBuilder.ToString();
-                var listOfKeywords = new List<TokenType>( new [] {
+                var listOfKeywords = new List<TokenType>( new TokenType[] {
                     TokenType.KEBAB,
                     TokenType.GIVE_BACK,
                     TokenType.GIVES_BACK,
@@ -138,11 +142,17 @@ namespace CMC
                         return new Token( identifierSpelling, item);
                     }
                 }
-                return new Token( identifierSpelling, TokenType.IDENTIFIER );
+                return new Token( identifierSpelling, TokenType.USER_CREATABLE_ID );
+
             }
 
             return new Token( "", TokenType.ERROR );
         }
+
+
+
+
+
 
         private bool IsLetter( char c )
         {
@@ -157,7 +167,7 @@ namespace CMC
             //check for comment and other garbage
             RemoveGarbage();
 
-            if( '\0' == _currentChar  || '\uffff' == _currentChar)
+            if( '\0' == currentChar  || '\uffff' == currentChar)
             {
                 return new Token( "", TokenType.END_OF_TEXT );
             }

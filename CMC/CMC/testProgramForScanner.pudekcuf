@@ -4,8 +4,24 @@ kebab myKebab
 	inty maInt;
 ]
 
+function start takes nothing givesBack inty[ # like a main method
+
+	# while loop
+	loop aye or nay
+	[
+		stopTheLoop;
+	]
+
+	# if statement
+	if aye or nay
+	[
+		myNamedKebab.maInt = 123;
+	]
+]
+
+
 myKebab myNamedKebab;
-myNamedKebab.maInt = 123;
+
 
 #define a function
 function multiply takes inty a, inty b givesBack inty
@@ -14,19 +30,9 @@ function multiply takes inty a, inty b givesBack inty
 ]
 
 # function call
-inty result = call multiply with 1, 2;
+#inty result = call multiply with 1, 2;
 
-# while loop
-loop aye or nay
-[
-	stopTheLoop;
-]
 
-# if statement
-if aye or nay
-[
-	
-]
 
 # function definition that has void as a return type.
 function hello takes inty a givesBack nothing

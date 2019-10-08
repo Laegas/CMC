@@ -1,10 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace CMC
 {
     public class SourceFile
     {
-        private StreamReader StreamReader { get; }
+        private StreamReader StreamReader { get; set; }
         public SourceFile( string path )
         {
             StreamReader = File.OpenText( path );
