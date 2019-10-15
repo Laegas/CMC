@@ -73,7 +73,6 @@ namespace CMC
 
 
             var listOfOneCharTokens = new List<TokenType>( new TokenType[] {
-                TokenType.INTY_OPERATOR,
                 TokenType.DOT,
                 TokenType.ASSIGNMENT,
                 TokenType.SEMICOLON,
@@ -94,6 +93,18 @@ namespace CMC
                     ReadNextCharacterIntoCurrentChar();
                     return new Token( oldChar.ToString(), item );
                 }
+            }
+
+            //additional single char tokens
+            switch( currentChar )
+            {
+                case '+': case '-':
+                    return new Token( currentChar.ToString(), TokenType.OPERATOR_2 );
+                    break;
+                case '*': case '/':
+                    return new Token( currentChar.ToString(), TokenType.OPERATOR_3 );
+                    break;
+
             }
 
             // is inty literal?
@@ -132,7 +143,10 @@ namespace CMC
                     TokenType.VARIABLE_TYPE,
                     TokenType.BOOLY_LITERAL,
                     TokenType.NOTHING,
-                    TokenType.BOOLY_OPERATOR
+                    TokenType.OPERATOR_1,
+                    TokenType.OPERATOR_2,
+                    TokenType.OPERATOR_3,
+                    TokenType.COOK
                 } );
 
                 foreach( var item in listOfKeywords )

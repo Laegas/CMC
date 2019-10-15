@@ -9,9 +9,9 @@ namespace CMC
         private Scanner scanner;
         private Token currentToken;
 
-        public Parser(SourceFile sourceFile)
+        public Parser( SourceFile sourceFile )
         {
-            this.scanner = new Scanner(sourceFile);
+            this.scanner = new Scanner( sourceFile );
             this.currentToken = scanner.ScanToken();
         }
 
@@ -22,7 +22,7 @@ namespace CMC
 
         private void ParseDeclarations()
         {
-            while (false == currentToken.TheTokenType.Equals(Token.TokenType.END_OF_TEXT))
+            while( false == currentToken.TheTokenType.Equals( Token.TokenType.END_OF_TEXT ) )
             {
                 ParseDeclaration();
             }
@@ -30,148 +30,158 @@ namespace CMC
 
         private void ParseDeclaration()
         {
-            switch (currentToken.TheTokenType)
+            switch( currentToken.TheTokenType )
             {
                 case Token.TokenType.VARIABLE_TYPE: //varriable declaration
                 case Token.TokenType.USER_CREATABLE_ID:
-                    ParseVarriableDeclaration();
-                    Accept(Token.TokenType.SEMICOLON);
+                    ParseVariableDeclaration();
                     break;
                 case Token.TokenType.FUNCTION: // function declaration
-                    //Function declaration
                     ParseFunctionDeclaration();
                     break;
-                case Token.TokenType.KEBAB:
-                    //struct
-                    ParseStruct();
+                case Token.TokenType.KEBAB: //struct
+                    ParseStruct(); 
                     break;
             }
-
         }
 
-        private void ParseVarriableDeclaration()
+        private void ParseVariableDeclaration()
         {
-            if (currentToken.TheTokenType.Equals(Token.TokenType.VARIABLE_TYPE))
+            if( currentToken.TheTokenType.Equals( Token.TokenType.VARIABLE_TYPE ) )
             {
-                Accept(Token.TokenType.VARIABLE_TYPE);
+                Accept( Token.TokenType.VARIABLE_TYPE );
+
+                Accept( Token.TokenType.USER_CREATABLE_ID );
+
+                if( currentToken.TheTokenType.Equals( Token.TokenType.ASSIGNMENT ) )
+                {
+                    Accept( Token.TokenType.ASSIGNMENT );
+                    ParseExpression1();
+                }
             }
-            else
+            else if(Token.TokenType.COOK == currentToken.TheTokenType )
             {
-                Accept(Token.TokenType.USER_CREATABLE_ID);
+                ParseStructVariableDeclaration();
             }
 
-            Accept(Token.TokenType.USER_CREATABLE_ID);
+            Accept( Token.TokenType.SEMICOLON );
 
-            if (currentToken.TheTokenType.Equals(Token.TokenType.ASSIGNMENT))
-            {
-                Accept(Token.TokenType.ASSIGNMENT);
-                ParseExpression();
-            }
-
+        }
+        private void ParseStructVariableDeclaration()
+        {
+            Accept( Token.TokenType.COOK );
+            Accept( Token.TokenType.USER_CREATABLE_ID );
         }
         private void ParseFunctionDeclaration()
         {
-            Accept(Token.TokenType.FUNCTION);
-            Accept(Token.TokenType.USER_CREATABLE_ID);
-            Accept(Token.TokenType.TAKES);
+            Accept( Token.TokenType.FUNCTION );
+            Accept( Token.TokenType.USER_CREATABLE_ID );
+            Accept( Token.TokenType.TAKES );
             ParseParameterList();
-            Accept(Token.TokenType.GIVES_BACK);
+            Accept( Token.TokenType.GIVES_BACK );
             ParseReturnType();
-            Accept(Token.TokenType.LEFT_SQUARE);
+            Accept( Token.TokenType.LEFT_SQUARE );
             ParseStatements();
-            Accept(Token.TokenType.RIGHT_SQUARE);
+            Accept( Token.TokenType.RIGHT_SQUARE );
         }
 
         private void ParseStruct()
         {
 
-            Accept(Token.TokenType.KEBAB);
-            Accept(Token.TokenType.USER_CREATABLE_ID);
-            Accept(Token.TokenType.LEFT_SQUARE);
-            ParseVarriableDeclarationList();
-            Accept(Token.TokenType.RIGHT_SQUARE);
+            Accept( Token.TokenType.KEBAB );
+            Accept( Token.TokenType.USER_CREATABLE_ID );
+            Accept( Token.TokenType.LEFT_SQUARE );
+            ParseVariableDeclarationList();
+            Accept( Token.TokenType.RIGHT_SQUARE );
 
         }
         private void ParseReturnType()
         {
-            if (currentToken.TheTokenType.Equals(Token.TokenType.NOTHING))
+            if( currentToken.TheTokenType.Equals( Token.TokenType.NOTHING ) )
             {
-                Accept(Token.TokenType.NOTHING);
+                Accept( Token.TokenType.NOTHING );
             }
             else
             {
-                Accept(Token.TokenType.VARIABLE_TYPE);
+                Accept( Token.TokenType.VARIABLE_TYPE );
             }
         }
 
         private void ParseParameterList()
         {
-            if (currentToken.TheTokenType.Equals(Token.TokenType.NOTHING))
+            if( currentToken.TheTokenType.Equals( Token.TokenType.NOTHING ) )
             {
-                Accept(Token.TokenType.NOTHING);
+                Accept( Token.TokenType.NOTHING );
             }
             else
             {
-                Accept(Token.TokenType.VARIABLE_TYPE);
-                Accept(Token.TokenType.USER_CREATABLE_ID);
-                while (currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
+                Accept( Token.TokenType.VARIABLE_TYPE );
+                Accept( Token.TokenType.USER_CREATABLE_ID );
+                while( currentToken.TheTokenType.Equals( Token.TokenType.COMMA ) )
                 {
-                    Accept(Token.TokenType.COMMA);
-                    Accept(Token.TokenType.VARIABLE_TYPE);
-                    Accept(Token.TokenType.USER_CREATABLE_ID);
+                    Accept( Token.TokenType.COMMA );
+                    Accept( Token.TokenType.VARIABLE_TYPE );
+                    Accept( Token.TokenType.USER_CREATABLE_ID );
                 }
             }
         }
 
-        private void ParseExpression()
+        private void ParseExpression1()
         {
-            switch (currentToken.TheTokenType)
+            ParseExpression2();
+            if( Token.TokenType.OPERATOR_1 == currentToken.TheTokenType )
             {
-                case Token.TokenType.LEFT_PAREN:
-                    Accept(Token.TokenType.LEFT_PAREN);
-                    ParseExpression();
-                    Accept(Token.TokenType.RIGHT_PAREN);
+                Accept( Token.TokenType.OPERATOR_1 );
+                ParseExpression1();
+            }
+        }
+
+        private void ParseExpression2()
+        {
+            ParseExpression3();
+            if( Token.TokenType.OPERATOR_2 == currentToken.TheTokenType )
+            {
+                Accept( Token.TokenType.OPERATOR_2 );
+                ParseExpression1();
+            }
+
+        }
+        private void ParseExpression3()
+        {
+            ParsePrimary();
+            if( Token.TokenType.OPERATOR_3 == currentToken.TheTokenType )
+            {
+                Accept( Token.TokenType.OPERATOR_3 );
+                ParseExpression1();
+            }
+
+        }
+
+
+        private void ParsePrimary()
+        {
+            switch( currentToken.TheTokenType )
+            {
+                case Token.TokenType.USER_CREATABLE_ID:
+                    ParseIdentifier();
+                    break;
+                case Token.TokenType.BOOLY_LITERAL:
+                case Token.TokenType.INTY_LITERAL:
+                    ParseLiteral();
                     break;
                 case Token.TokenType.CALL:
                     ParseFunctionCall();
                     break;
-                default:
-                    if (currentToken.TheTokenType.Equals(Token.TokenType.USER_CREATABLE_ID))
-                    {
-                        ParseIdentifier();
-                    }
-                    else
-                    {
-                        ParseLiteral();
-                    }
-
-                    if( CurrentTokenIsOperator() )
-                    {
-                        ParseOperator();
-                        ParseExpression();
-                    }
+                case Token.TokenType.LEFT_PAREN:
+                    Accept( Token.TokenType.LEFT_PAREN );
+                    ParseExpression1();
+                    Accept( Token.TokenType.RIGHT_PAREN );
                     break;
+                default:
+                    throw new Exception( "Generic exception" );
             }
-
-        }
-        private bool CurrentTokenIsOperator()
-        {
-            return currentToken.TheTokenType.Equals( Token.TokenType.INTY_OPERATOR )
-                || currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_OPERATOR )
-                ;
         }
 
-        private void ParseOperator()
-        {
-            if( currentToken.TheTokenType.Equals( Token.TokenType.INTY_OPERATOR ) )
-            {
-                Accept( Token.TokenType.INTY_OPERATOR );
-            }
-            else if( currentToken.TheTokenType.Equals( Token.TokenType.BOOLY_OPERATOR ) )
-            {
-                Accept( Token.TokenType.BOOLY_OPERATOR );
-            }
-        }
 
         //private bool CurrentTokenIsLiteral()
         //{
@@ -190,27 +200,29 @@ namespace CMC
                 Accept( Token.TokenType.INTY_LITERAL );
             }
         }
-        
 
-        private void ParseVarriableDeclarationList()
+
+        private void ParseVariableDeclarationList()
         {
-            while (currentToken.TheTokenType.Equals(Token.TokenType.VARIABLE_TYPE))
+            while(
+                currentToken.TheTokenType == Token.TokenType.VARIABLE_TYPE
+                || currentToken.TheTokenType == Token.TokenType.USER_CREATABLE_ID
+                )
             {
-                ParseVarriableDeclaration();
-                Accept(Token.TokenType.SEMICOLON);
+                ParseVariableDeclaration();
             }
         }
-
+        
         private void ParseStatements()
         {
-            while (CurrentTokenStartOfStatement())
+            while( CurrentTokenStartOfStatement() )
             {
                 ParseStatement();
             }
         }
         private bool CurrentTokenStartOfStatement()
         {
-            switch (currentToken.TheTokenType)
+            switch( currentToken.TheTokenType )
             {
                 case Token.TokenType.GIVE_BACK:
                 case Token.TokenType.STOP_THE_LOOP:
@@ -226,7 +238,7 @@ namespace CMC
 
         private bool CurrentTokenStartOfExpression()
         {
-            switch (currentToken.TheTokenType)
+            switch( currentToken.TheTokenType )
             {
                 case Token.TokenType.LEFT_PAREN:
                 case Token.TokenType.USER_CREATABLE_ID:
@@ -238,71 +250,69 @@ namespace CMC
         }
         private void ParseStatement()
         {
-            switch (currentToken.TheTokenType)
+            switch( currentToken.TheTokenType )
             {
                 case Token.TokenType.GIVE_BACK:
-                    Accept(Token.TokenType.GIVE_BACK);
-                    if (CurrentTokenStartOfExpression())
+                    Accept( Token.TokenType.GIVE_BACK );
+                    if( CurrentTokenStartOfExpression() )
                     {
-                        ParseExpression();
+                        ParseExpression1();
                     }
                     Accept( Token.TokenType.SEMICOLON );
                     break;
                 case Token.TokenType.STOP_THE_LOOP:
-                    Accept(Token.TokenType.STOP_THE_LOOP);
-                    Accept(Token.TokenType.SEMICOLON);
+                    Accept( Token.TokenType.STOP_THE_LOOP );
+                    Accept( Token.TokenType.SEMICOLON );
                     break;
                 case Token.TokenType.LOOP:
-                    Accept(Token.TokenType.LOOP);
-                    ParseExpression();
-                    Accept(Token.TokenType.LEFT_SQUARE);
+                    Accept( Token.TokenType.LOOP );
+                    ParseExpression1();
+                    Accept( Token.TokenType.LEFT_SQUARE );
                     ParseStatements();
-                    Accept(Token.TokenType.RIGHT_SQUARE);
+                    Accept( Token.TokenType.RIGHT_SQUARE );
                     break;
-                case Token.TokenType.IF:
-                    Accept(Token.TokenType.IF);
-                    ParseExpression();
-                    Accept(Token.TokenType.LEFT_SQUARE);
+                case Token.TokenType.IF: //if statement
+                    Accept( Token.TokenType.IF );
+                    ParseExpression1();
+                    Accept( Token.TokenType.LEFT_SQUARE );
                     ParseStatements();
-                    Accept(Token.TokenType.RIGHT_SQUARE);
+                    Accept( Token.TokenType.RIGHT_SQUARE );
                     break;
-                case Token.TokenType.CALL:
+                case Token.TokenType.CALL: // function call
                     ParseFunctionCall();
                     Accept( Token.TokenType.SEMICOLON );
                     break;
-                case Token.TokenType.USER_CREATABLE_ID:
+                case Token.TokenType.USER_CREATABLE_ID: // assignment
                     ParseIdentifier();
-                    Accept(Token.TokenType.ASSIGNMENT);
-                    ParseExpression();
-                    Accept(Token.TokenType.SEMICOLON);
+                    Accept( Token.TokenType.ASSIGNMENT );
+                    ParseExpression1();
+                    Accept( Token.TokenType.SEMICOLON );
                     break;
-                case Token.TokenType.VARIABLE_TYPE:
-                    ParseVarriableDeclaration();
-                    Accept(Token.TokenType.SEMICOLON);
+                case Token.TokenType.VARIABLE_TYPE: // variable declaration
+                case Token.TokenType.COOK:
+                    ParseVariableDeclaration();
                     break;
                 default:
-                    throw new Exception("Exception in parsing statement");
+                    throw new Exception( "Exception in parsing statement" );
             }
         }
 
 
         private void ParseArgumentList()
         {
-            if( CurrentTokenStartOfIdentifier() )
-            {
-                ParseIdentifier();
-                while( currentToken.TheTokenType.Equals( Token.TokenType.COMMA ) )
-                {
-                    Accept( Token.TokenType.COMMA );
-                    ParseIdentifier();
-                }
-            }
-            else
+            if( Token.TokenType.NOTHING == currentToken.TheTokenType )
             {
                 Accept( Token.TokenType.NOTHING );
             }
-            
-
+            else
+            {
+                ParseExpression1();
+                while( currentToken.TheTokenType.Equals( Token.TokenType.COMMA ) )
+                {
+                    Accept( Token.TokenType.COMMA );
+                    ParseExpression1();
+                }
+            }
         }
 
         private void ParseFunctionCall()
@@ -320,24 +330,24 @@ namespace CMC
         }
         private void ParseIdentifier()
         {
-            Accept(Token.TokenType.USER_CREATABLE_ID);
-            while (currentToken.TheTokenType.Equals(Token.TokenType.DOT))
+            Accept( Token.TokenType.USER_CREATABLE_ID );
+            while( currentToken.TheTokenType.Equals( Token.TokenType.DOT ) )
             {
-                Accept(Token.TokenType.DOT);
-                Accept(Token.TokenType.USER_CREATABLE_ID);
+                Accept( Token.TokenType.DOT );
+                Accept( Token.TokenType.USER_CREATABLE_ID );
             }
         }
 
-        private void Accept(Token.TokenType tokenType)
+        private void Accept( Token.TokenType tokenType )
         {
-            if (currentToken.TheTokenType.Equals(tokenType))
+            if( currentToken.TheTokenType.Equals( tokenType ) )
             {
-                Console.WriteLine("Accepted token of type: " + tokenType.ToString() + ", with spelling: " + currentToken.Spelling);
+                Console.WriteLine( "Accepted token of type: " + tokenType.ToString() + ", with spelling: " + currentToken.Spelling );
                 this.currentToken = scanner.ScanToken();
             }
             else
             {
-                Console.WriteLine("The parser failed, got token:" + currentToken.TheTokenType + ", but expected token of type: " + tokenType.ToString());
+                Console.WriteLine( "The parser failed, got token:" + currentToken.TheTokenType + ", but expected token of type: " + tokenType.ToString() );
             }
         }
     }

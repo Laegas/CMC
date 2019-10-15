@@ -16,7 +16,10 @@ namespace CMC
             {
                 tokenTypeToSpellingDictionary.Add( item, new List<string>());
             }
-            tokenTypeToSpellingDictionary[ TokenType.INTY_OPERATOR ].AddRange( new string[] { "+", "-", "*", "is" } );
+            tokenTypeToSpellingDictionary[ TokenType.COOK ].AddRange( new string[] { "cook" } );
+            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_1 ].AddRange( new string[] { "is" } );
+            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_2 ].AddRange( new string[] { "+", "-", "or" } );
+            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_3 ].AddRange( new string[] { "/", "*", "and" } );
             tokenTypeToSpellingDictionary[ TokenType.DOT ].AddRange( new string[] { "." } );
             tokenTypeToSpellingDictionary[ TokenType.COMMA ].AddRange( new string[] { "," } );
             tokenTypeToSpellingDictionary[ TokenType.ASSIGNMENT ].AddRange( new string[] { "=" } );
@@ -39,7 +42,6 @@ namespace CMC
             tokenTypeToSpellingDictionary[ TokenType.VARIABLE_TYPE ].AddRange( new string[] { "inty","booly" } );
             tokenTypeToSpellingDictionary[ TokenType.BOOLY_LITERAL ].AddRange( new string[] { "aye","nay" } );
             tokenTypeToSpellingDictionary[ TokenType.NOTHING ].AddRange( new string[] { "nothing" } );
-            tokenTypeToSpellingDictionary[ TokenType.BOOLY_OPERATOR ].AddRange( new string[] { "or", "and" } );
         }
         
         //this probably works
@@ -71,9 +73,11 @@ namespace CMC
         public enum TokenType {
 
             USER_CREATABLE_ID,
-            IDENTIFIER,
-            INTY_OPERATOR,
-            BOOLY_OPERATOR,
+            OPERATOR_1,
+            OPERATOR_2,
+            OPERATOR_3,
+            COOK,
+
             INTY_LITERAL,
             BOOLY_LITERAL,
             VARIABLE_TYPE,

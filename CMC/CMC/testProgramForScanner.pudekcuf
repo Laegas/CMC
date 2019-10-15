@@ -11,16 +11,19 @@ function start takes nothing givesBack inty[ # like a main method
 	[
 		stopTheLoop;
 	]
+	
+	myKebab myNamedKebab;
 
 	# if statement
 	if aye or nay
 	[
 		myNamedKebab.maInt = 123;
 	]
+
 ]
 
 
-myKebab myNamedKebab;
+
 
 
 #define a function
