@@ -5,10 +5,10 @@ using System.Text;
 
 namespace CMC
 {
-    class Token
+    public class Token
     {
 
-        private static Dictionary<TokenType, List<string>> tokenTypeToSpellingDictionary = new Dictionary<TokenType, List<string>>();
+        public static Dictionary<TokenType, List<string>> tokenTypeToSpellingDictionary = new Dictionary<TokenType, List<string>>();
         static Token() {
 
             var allEnumVals = Enum.GetValues( typeof( TokenType ) ).Cast<TokenType>();

@@ -17,11 +17,6 @@ namespace CMC
 
         public void ParseProgram()
         {
-            ParseDeclarations();
-        }
-
-        private void ParseDeclarations()
-        {
             while( false == currentToken.TheTokenType.Equals( Token.TokenType.END_OF_TEXT ) )
             {
                 ParseDeclaration();
