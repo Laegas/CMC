@@ -95,16 +95,19 @@ namespace CMC
                 }
             }
 
+            var spelling = currentChar;
+
             //additional single char tokens
             switch( currentChar )
             {
                 case '+': case '-':
-                    return new Token( currentChar.ToString(), TokenType.OPERATOR_2 );
+                    ReadNextCharacterIntoCurrentChar();
+                    return new Token( spelling.ToString(), TokenType.OPERATOR_2 );
                     break;
                 case '*': case '/':
-                    return new Token( currentChar.ToString(), TokenType.OPERATOR_3 );
+                    ReadNextCharacterIntoCurrentChar();
+                    return new Token( spelling.ToString(), TokenType.OPERATOR_3 );
                     break;
-
             }
 
             // is inty literal?

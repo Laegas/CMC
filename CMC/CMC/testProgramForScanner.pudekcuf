@@ -12,7 +12,7 @@ function start takes nothing givesBack inty[ # like a main method
 		stopTheLoop;
 	]
 	
-	myKebab myNamedKebab;
+	cook myKebab myNamedKebab;
 
 	# if statement
 	if aye or nay

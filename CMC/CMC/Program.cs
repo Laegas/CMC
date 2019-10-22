@@ -12,22 +12,18 @@ namespace CMC
 
             var parser = new Parser(sourceFile);
             parser.ParseProgram();
-            Console.WriteLine( "\n\nFinished parsing file" );
+            var scanner = new Scanner( sourceFile );
             //while( true )
             //{
-            //    parser.
-
-            //    //var token = scanner.ScanToken();
-            //    //Console.WriteLine( token.TheTokenType.ToString() + "(" + token.Spelling + ")" );
-            //    //if( token.TheTokenType.Equals(TokenType.END_OF_TEXT) )
-            //    //{
-            //    //    break;
-            //    //}else if( token.TheTokenType.Equals( TokenType.ERROR ) )
-            //    //{
-            //    //    Console.WriteLine( token.TheTokenType.ToString() + "(" + token.Spelling + ")" );
-            //    //    //throw new Exception( "GOT A ERROR IN THE SCANNER" );
-            //    //}
+            //    var token = scanner.ScanToken();
+            //    Console.WriteLine( token.TheTokenType  + token.Spelling);
+            //    if( Token.TokenType.END_OF_TEXT == token.TheTokenType )
+            //    {
+            //        break;
+            //    }
             //}
+            Console.WriteLine( "\n\nFinished parsing file" );
+          
 
             Console.ReadKey();
         }

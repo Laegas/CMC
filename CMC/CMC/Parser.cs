@@ -71,6 +71,7 @@ namespace CMC
         {
             Accept( Token.TokenType.COOK );
             Accept( Token.TokenType.USER_CREATABLE_ID );
+            Accept( Token.TokenType.USER_CREATABLE_ID );
         }
         private void ParseFunctionDeclaration()
         {
@@ -101,9 +102,11 @@ namespace CMC
             {
                 Accept( Token.TokenType.NOTHING );
             }
-            else
+            else if( currentToken.TheTokenType.Equals( Token.TokenType.VARIABLE_TYPE ) )
             {
                 Accept( Token.TokenType.VARIABLE_TYPE );
+            }else{
+               throw VeryGenericException( "Exception in parse return type" );
             }
         }
 
@@ -113,7 +116,7 @@ namespace CMC
             {
                 Accept( Token.TokenType.NOTHING );
             }
-            else
+            else if( currentToken.TheTokenType.Equals( Token.TokenType.VARIABLE_TYPE) )
             {
                 Accept( Token.TokenType.VARIABLE_TYPE );
                 Accept( Token.TokenType.USER_CREATABLE_ID );
@@ -123,6 +126,10 @@ namespace CMC
                     Accept( Token.TokenType.VARIABLE_TYPE );
                     Accept( Token.TokenType.USER_CREATABLE_ID );
                 }
+            }
+            else
+            {
+                throw VeryGenericException( "Exception in parse parameter list" );
             }
         }
 
@@ -195,12 +202,20 @@ namespace CMC
             {
                 Accept( Token.TokenType.BOOLY_LITERAL );
             }
-            else
+            else if( currentToken.TheTokenType.Equals( Token.TokenType.INTY_LITERAL ) )
             {
                 Accept( Token.TokenType.INTY_LITERAL );
             }
+            else {
+                throw VeryGenericException("exception in ParseLiteral");
+            }
         }
 
+        private static Exception VeryGenericException(string message)
+        {
+            throw new Exception( message);
+
+        }
 
         private void ParseVariableDeclarationList()
         {
@@ -231,6 +246,7 @@ namespace CMC
                 case Token.TokenType.CALL:
                 case Token.TokenType.USER_CREATABLE_ID:
                 case Token.TokenType.VARIABLE_TYPE:
+                case Token.TokenType.COOK:
                     return true;
             }
             return false;
@@ -304,7 +320,7 @@ namespace CMC
             {
                 Accept( Token.TokenType.NOTHING );
             }
-            else
+            else // in else we trust 
             {
                 ParseExpression1();
                 while( currentToken.TheTokenType.Equals( Token.TokenType.COMMA ) )

@@ -6,6 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="_testProgramForScanner.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testProgramForScanner.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
