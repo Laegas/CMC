@@ -1,77 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace CMC
 {
     public class Token
     {
-
-        public static Dictionary<TokenType, List<string>> tokenTypeToSpellingDictionary = new Dictionary<TokenType, List<string>>();
-        static Token() {
-
-            var allEnumVals = Enum.GetValues( typeof( TokenType ) ).Cast<TokenType>();
-            foreach(var item in allEnumVals )
-            {
-                tokenTypeToSpellingDictionary.Add( item, new List<string>());
-            }
-            tokenTypeToSpellingDictionary[ TokenType.COOK ].AddRange( new string[] { "cook" } );
-            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_1 ].AddRange( new string[] { "is" } );
-            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_2 ].AddRange( new string[] { "+", "-", "or" } );
-            tokenTypeToSpellingDictionary[ TokenType.OPERATOR_3 ].AddRange( new string[] { "/", "*", "and" } );
-            tokenTypeToSpellingDictionary[ TokenType.DOT ].AddRange( new string[] { "." } );
-            tokenTypeToSpellingDictionary[ TokenType.COMMA ].AddRange( new string[] { "," } );
-            tokenTypeToSpellingDictionary[ TokenType.ASSIGNMENT ].AddRange( new string[] { "=" } );
-            tokenTypeToSpellingDictionary[ TokenType.SEMICOLON ].AddRange( new string[] { ";" } );
-            tokenTypeToSpellingDictionary[ TokenType.LEFT_PAREN ].AddRange( new string[] { "(" } );
-            tokenTypeToSpellingDictionary[ TokenType.RIGHT_PAREN ].AddRange( new string[] { ")" } );
-            tokenTypeToSpellingDictionary[ TokenType.LEFT_SQUARE ].AddRange( new string[] { "[" } );
-            tokenTypeToSpellingDictionary[ TokenType.RIGHT_SQUARE ].AddRange( new string[] { "]" } );
-            tokenTypeToSpellingDictionary[ TokenType.KEBAB ].AddRange( new string[] { "kebab" } );
-            tokenTypeToSpellingDictionary[ TokenType.GIVE_BACK ].AddRange( new string[] { "giveBack" } );
-            tokenTypeToSpellingDictionary[ TokenType.GIVES_BACK ].AddRange( new string[] { "givesBack" } );
-            tokenTypeToSpellingDictionary[ TokenType.TAKES ].AddRange( new string[] { "takes" } );
-            tokenTypeToSpellingDictionary[ TokenType.STOP_THE_LOOP ].AddRange( new string[] { "stopTheLoop" } );
-            tokenTypeToSpellingDictionary[ TokenType.LOOP ].AddRange( new string[] { "loop" } );
-            tokenTypeToSpellingDictionary[ TokenType.IF ].AddRange( new string[] { "if" } );
-            tokenTypeToSpellingDictionary[ TokenType.CALL ].AddRange( new string[] { "call" } );
-            tokenTypeToSpellingDictionary[ TokenType.WITH ].AddRange( new string[] { "with" } );
-            tokenTypeToSpellingDictionary[ TokenType.FUNCTION ].AddRange( new string[] { "function" } );
-            tokenTypeToSpellingDictionary[ TokenType.END_OF_TEXT ].AddRange( new string[] { "\0" } );
-            tokenTypeToSpellingDictionary[ TokenType.VARIABLE_TYPE ].AddRange( new string[] { "inty","booly" } );
-            tokenTypeToSpellingDictionary[ TokenType.BOOLY_LITERAL ].AddRange( new string[] { "aye","nay" } );
-            tokenTypeToSpellingDictionary[ TokenType.NOTHING ].AddRange( new string[] { "nothing" } );
-        }
-        
-        //this probably works
-        public static bool CharIsTokenType(TokenType type, char theChar )
+        public enum TokenType
         {
-            return tokenTypeToSpellingDictionary[ type ].Contains( theChar.ToString() );
-        }
-        public static bool IdentifierIsTokenType( TokenType type, string identifierSpelling )
-        {
-            return tokenTypeToSpellingDictionary[ type ].Contains( identifierSpelling );
-        }
-
-        public string Spelling { get; set; }
-        public TokenType TheTokenType { get; set; }
-
-        /// <summary>
-        /// this is a dumb class
-        /// </summary>
-        /// <param name="spelling"></param>
-        /// <param name="tokenType"></param>
-        public Token(string spelling, TokenType tokenType)
-        {
-            this.Spelling = spelling;
-            this.TheTokenType = tokenType;
-
-        }
-
-
-        public enum TokenType {
-
             USER_CREATABLE_ID,
             OPERATOR_1,
             OPERATOR_2,
@@ -107,5 +43,64 @@ namespace CMC
             NOT_YET_ASSIGNED
         }
 
+        public static Dictionary<TokenType, List<string>> tokenTypeToSpellingDictionary =
+            new Dictionary<TokenType, List<string>>();
+
+        static Token()
+        {
+            IEnumerable<TokenType> allEnumVals = Enum.GetValues(typeof(TokenType)).Cast<TokenType>();
+            foreach (TokenType item in allEnumVals) tokenTypeToSpellingDictionary.Add(item, new List<string>());
+            tokenTypeToSpellingDictionary[TokenType.COOK].AddRange(new[] {"cook"});
+            tokenTypeToSpellingDictionary[TokenType.OPERATOR_1].AddRange(new[] {"is"});
+            tokenTypeToSpellingDictionary[TokenType.OPERATOR_2].AddRange(new[] {"+", "-", "or"});
+            tokenTypeToSpellingDictionary[TokenType.OPERATOR_3].AddRange(new[] {"/", "*", "and"});
+            tokenTypeToSpellingDictionary[TokenType.DOT].AddRange(new[] {"."});
+            tokenTypeToSpellingDictionary[TokenType.COMMA].AddRange(new[] {","});
+            tokenTypeToSpellingDictionary[TokenType.ASSIGNMENT].AddRange(new[] {"="});
+            tokenTypeToSpellingDictionary[TokenType.SEMICOLON].AddRange(new[] {";"});
+            tokenTypeToSpellingDictionary[TokenType.LEFT_PAREN].AddRange(new[] {"("});
+            tokenTypeToSpellingDictionary[TokenType.RIGHT_PAREN].AddRange(new[] {")"});
+            tokenTypeToSpellingDictionary[TokenType.LEFT_SQUARE].AddRange(new[] {"["});
+            tokenTypeToSpellingDictionary[TokenType.RIGHT_SQUARE].AddRange(new[] {"]"});
+            tokenTypeToSpellingDictionary[TokenType.KEBAB].AddRange(new[] {"kebab"});
+            tokenTypeToSpellingDictionary[TokenType.GIVE_BACK].AddRange(new[] {"giveBack"});
+            tokenTypeToSpellingDictionary[TokenType.GIVES_BACK].AddRange(new[] {"givesBack"});
+            tokenTypeToSpellingDictionary[TokenType.TAKES].AddRange(new[] {"takes"});
+            tokenTypeToSpellingDictionary[TokenType.STOP_THE_LOOP].AddRange(new[] {"stopTheLoop"});
+            tokenTypeToSpellingDictionary[TokenType.LOOP].AddRange(new[] {"loop"});
+            tokenTypeToSpellingDictionary[TokenType.IF].AddRange(new[] {"if"});
+            tokenTypeToSpellingDictionary[TokenType.CALL].AddRange(new[] {"call"});
+            tokenTypeToSpellingDictionary[TokenType.WITH].AddRange(new[] {"with"});
+            tokenTypeToSpellingDictionary[TokenType.FUNCTION].AddRange(new[] {"function"});
+            tokenTypeToSpellingDictionary[TokenType.END_OF_TEXT].AddRange(new[] {"\0"});
+            tokenTypeToSpellingDictionary[TokenType.VARIABLE_TYPE].AddRange(new[] {"inty", "booly"});
+            tokenTypeToSpellingDictionary[TokenType.BOOLY_LITERAL].AddRange(new[] {"aye", "nay"});
+            tokenTypeToSpellingDictionary[TokenType.NOTHING].AddRange(new[] {"nothing"});
+        }
+
+        /// <summary>
+        ///     this is a dumb class
+        /// </summary>
+        /// <param name="spelling"></param>
+        /// <param name="tokenType"></param>
+        public Token(string spelling, TokenType tokenType)
+        {
+            Spelling = spelling;
+            TheTokenType = tokenType;
+        }
+
+        public string Spelling { get; set; }
+        public TokenType TheTokenType { get; set; }
+
+        //this probably works
+        public static bool CharIsTokenType(TokenType type, char theChar)
+        {
+            return tokenTypeToSpellingDictionary[type].Contains(theChar.ToString());
+        }
+
+        public static bool IdentifierIsTokenType(TokenType type, string identifierSpelling)
+        {
+            return tokenTypeToSpellingDictionary[type].Contains(identifierSpelling);
+        }
     }
 }

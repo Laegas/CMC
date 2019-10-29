@@ -1,72 +1,44 @@
-﻿using System.Collections.Generic;
-
-namespace CMC.AST
+﻿namespace CMC.AST
 {
     public class Expression1 : AST
     {
+        public Expression1(Expression2 expression2, Operator1 operator1, Expression1 expression1)
+        {
+            Expression2 = expression2;
+            Operator1 = operator1;
+            Expression1_ = expression1;
+        }
+
+        public Expression2 Expression2 { get; }
+        public Operator1 Operator1 { get; }
+        public Expression1 Expression1_ { get; }
+    }
+
+    public class Expression2 : AST
+    {
+        public Expression2(Expression3 expression3, Operator2 operator2, Expression1 expression1)
+        {
+            Expression3 = expression3;
+            Operator2 = operator2;
+            Expression1 = expression1;
+        }
+
+        public Expression3 Expression3 { get; }
+        public Operator2 Operator2 { get; }
+        public Expression1 Expression1 { get; }
     }
 
     public class Expression3 : AST
     {
-    }
-
-    public abstract class Primary : AST
-    {
-    }
-
-    public class PrimaryIdentifier : Primary
-    {
-        public UserCreatableID RootID { get; }
-        public List<UserCreatableID> NestedIDs { get; }
-
-        public PrimaryIdentifier(UserCreatableID rootId, List<UserCreatableID> nestedIDs)
+        public Expression3(Primary primary, Operator3 operator3, Expression1 expression1)
         {
-            RootID = rootId;
-            NestedIDs = nestedIDs;
+            Primary = primary;
+            Operator3 = operator3;
+            Expression1 = expression1;
         }
-    }
 
-    public abstract class PrimaryLiteral : Primary
-    {
-    }
-
-    public class PrimaryBoolyLiteral : PrimaryLiteral
-    {
-        public BoolyLiteral Value { get; }
-
-        public PrimaryBoolyLiteral(BoolyLiteral value)
-        {
-            Value = value;
-        }
-    }
-
-    public class PrimaryIntyLiteral : PrimaryLiteral
-    {
-        public IntyLiteral Value { get; }
-
-        public PrimaryIntyLiteral(IntyLiteral value)
-        {
-            Value = value;
-        }
-    }
-
-    public class PrimaryFunctionCall : Primary
-    {
-        public FunctionCall FunctionCall { get; }
-
-        public PrimaryFunctionCall(FunctionCall functionCall)
-        {
-            FunctionCall = functionCall;
-        }
-    }
-
-    public class PrimaryExpression : Primary
-    {
-        public Expression1 Expression { get; }
-
-        public PrimaryExpression(Expression1 expression)
-        {
-            Expression = expression;
-        }
+        public Primary Primary { get; }
+        public Operator3 Operator3 { get; }
+        public Expression1 Expression1 { get; }
     }
 }

@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static CMC.Token;
 
 namespace CMC
 {
-    class Scanner
+    internal class Scanner
     {
-        private SourceFile sourceFile;
         private char currentChar;
+        private readonly SourceFile sourceFile;
 
-        public Scanner( SourceFile sourcerFile )
+        public Scanner(SourceFile sourcerFile)
         {
-            this.sourceFile = sourcerFile;
+            sourceFile = sourcerFile;
             ReadNextCharacterIntoCurrentChar();
         }
 
@@ -24,7 +23,7 @@ namespace CMC
             {
                 currentChar = sourceFile.GetChar();
             }
-            catch( EndOfStreamException ex )
+            catch (EndOfStreamException ex)
             {
                 //return end of file char
                 currentChar = '\0';
@@ -42,37 +41,30 @@ namespace CMC
                 ' '
             };
 
-            var garbageCharSet = new HashSet<char>( chars );
-            while( garbageCharSet.Contains( currentChar ) )
-            {
-                if( '#' == currentChar )
+            var garbageCharSet = new HashSet<char>(chars);
+            while (garbageCharSet.Contains(currentChar))
+                if ('#' == currentChar)
                 {
                     //read till new line
-                    while( '\n' != currentChar && '\0' != currentChar )
-                    {
-                        ReadNextCharacterIntoCurrentChar();
-                    }
+                    while ('\n' != currentChar && '\0' != currentChar) ReadNextCharacterIntoCurrentChar();
 
-                    if( '\n' == currentChar )
-                    {
-                        ReadNextCharacterIntoCurrentChar(); // removes the '\n'
-                    }
+                    if ('\n' == currentChar) ReadNextCharacterIntoCurrentChar(); // removes the '\n'
                 }
                 else
                 {
                     ReadNextCharacterIntoCurrentChar();
                 }
-            }
         }
 
         private Token GetToken()
         {
             var stringBuilder = new StringBuilder();
 
-            TokenType tokenType = TokenType.NOT_YET_ASSIGNED;
+            var tokenType = TokenType.NOT_YET_ASSIGNED;
 
 
-            var listOfOneCharTokens = new List<TokenType>( new TokenType[] {
+            var listOfOneCharTokens = new List<TokenType>(new[]
+            {
                 TokenType.DOT,
                 TokenType.ASSIGNMENT,
                 TokenType.SEMICOLON,
@@ -82,57 +74,58 @@ namespace CMC
                 TokenType.RIGHT_SQUARE,
                 TokenType.END_OF_TEXT,
                 TokenType.COMMA
-            } );
+            });
 
-            foreach( var item in listOfOneCharTokens )
-            {
-                if( Token.CharIsTokenType( item, currentChar ) )
+            foreach (TokenType item in listOfOneCharTokens)
+                if (CharIsTokenType(item, currentChar))
                 {
-                    var oldChar = currentChar;
+                    char oldChar = currentChar;
 
                     ReadNextCharacterIntoCurrentChar();
-                    return new Token( oldChar.ToString(), item );
+                    return new Token(oldChar.ToString(), item);
                 }
-            }
 
-            var spelling = currentChar;
+            char spelling = currentChar;
 
             //additional single char tokens
-            switch( currentChar )
+            switch (currentChar)
             {
-                case '+': case '-':
+                case '+':
+                case '-':
                     ReadNextCharacterIntoCurrentChar();
-                    return new Token( spelling.ToString(), TokenType.OPERATOR_2 );
+                    return new Token(spelling.ToString(), TokenType.OPERATOR_2);
                     break;
-                case '*': case '/':
+                case '*':
+                case '/':
                     ReadNextCharacterIntoCurrentChar();
-                    return new Token( spelling.ToString(), TokenType.OPERATOR_3 );
+                    return new Token(spelling.ToString(), TokenType.OPERATOR_3);
                     break;
             }
 
             // is inty literal?
-            if( IsDigit( currentChar ) )
+            if (IsDigit(currentChar))
             {
-                while( IsDigit( currentChar ) )
+                while (IsDigit(currentChar))
                 {
-                    stringBuilder.Append( currentChar );
+                    stringBuilder.Append(currentChar);
                     ReadNextCharacterIntoCurrentChar();
                 }
 
-                return new Token( stringBuilder.ToString(), TokenType.INTY_LITERAL );
+                return new Token(stringBuilder.ToString(), TokenType.INTY_LITERAL);
             }
 
             //should now be an identifyer
-            if( IsLetter( currentChar ) )
+            if (IsLetter(currentChar))
             {
-                while( IsLetter( currentChar ) )
+                while (IsLetter(currentChar))
                 {
-                    stringBuilder.Append( currentChar );
+                    stringBuilder.Append(currentChar);
                     ReadNextCharacterIntoCurrentChar();
                 }
 
                 string identifierSpelling = stringBuilder.ToString();
-                var listOfKeywords = new List<TokenType>( new TokenType[] {
+                var listOfKeywords = new List<TokenType>(new[]
+                {
                     TokenType.KEBAB,
                     TokenType.GIVE_BACK,
                     TokenType.GIVES_BACK,
@@ -150,44 +143,34 @@ namespace CMC
                     TokenType.OPERATOR_2,
                     TokenType.OPERATOR_3,
                     TokenType.COOK
-                } );
+                });
 
-                foreach( var item in listOfKeywords )
-                {
-                    if( Token.IdentifierIsTokenType( item, identifierSpelling ) )
-                    {
-                        return new Token( identifierSpelling, item);
-                    }
-                }
-                return new Token( identifierSpelling, TokenType.USER_CREATABLE_ID );
-
+                foreach (TokenType item in listOfKeywords)
+                    if (IdentifierIsTokenType(item, identifierSpelling))
+                        return new Token(identifierSpelling, item);
+                return new Token(identifierSpelling, TokenType.USER_CREATABLE_ID);
             }
 
-            return new Token( "", TokenType.ERROR );
+            return new Token("", TokenType.ERROR);
         }
 
 
-
-
-
-
-        private bool IsLetter( char c )
+        private bool IsLetter(char c)
         {
-            return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
+            return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
         }
-        private bool IsDigit( char c )
+
+        private bool IsDigit(char c)
         {
             return c >= '0' && c <= '9';
         }
+
         public Token ScanToken()
         {
             //check for comment and other garbage
             RemoveGarbage();
 
-            if( '\0' == currentChar  || '\uffff' == currentChar)
-            {
-                return new Token( "", TokenType.END_OF_TEXT );
-            }
+            if ('\0' == currentChar || '\uffff' == currentChar) return new Token("", TokenType.END_OF_TEXT);
 
             return GetToken();
         }

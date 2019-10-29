@@ -1,18 +1,17 @@
 ﻿using System;
-using static CMC.Token;
 
 namespace CMC
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var sourceFile = new SourceFile( @"testProgramForScanner.pudekcuf" );
+            var sourceFile = new SourceFile(@"testProgramForScanner.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);
             parser.ParseProgram();
-            var scanner = new Scanner( sourceFile );
+            var scanner = new Scanner(sourceFile);
             //while( true )
             //{
             //    var token = scanner.ScanToken();
@@ -22,8 +21,8 @@ namespace CMC
             //        break;
             //    }
             //}
-            Console.WriteLine( "\n\nFinished parsing file" );
-          
+            Console.WriteLine("\n\nFinished parsing file");
+
 
             Console.ReadKey();
         }

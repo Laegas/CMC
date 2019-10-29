@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CMC.AST
 {
@@ -7,19 +6,19 @@ namespace CMC.AST
     {
     }
 
-    public class NothingArgumentList : ArgumentList
+    public class ArgumentListNothing : ArgumentList
     {
     }
 
-    public class NonEmptyArgumentList : ArgumentList
+    public class ArgumentListSimple : ArgumentList
     {
-        public Expression1 FirstExpression { get; }
-        public List<Expression1> OtherExpressions { get; }
-
-        public NonEmptyArgumentList(Expression1 firstExpression, List<Expression1> otherExpressions)
+        public ArgumentListSimple(Expression1 firstExpression, List<Expression1> otherExpressions)
         {
             FirstExpression = firstExpression;
             OtherExpressions = otherExpressions;
         }
+
+        public Expression1 FirstExpression { get; }
+        public List<Expression1> OtherExpressions { get; }
     }
 }
