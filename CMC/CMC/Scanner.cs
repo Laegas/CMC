@@ -5,7 +5,7 @@ using static CMC.Token;
 
 namespace CMC
 {
-    internal class Scanner
+    public class Scanner
     {
         private char currentChar;
         private readonly SourceFile sourceFile;
