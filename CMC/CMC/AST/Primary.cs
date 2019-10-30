@@ -6,55 +6,76 @@
 
     public class PrimaryIdentifier : Primary
     {
+        public Identifier Identifier { get; }
+
         public PrimaryIdentifier(Identifier identifier)
         {
             Identifier = identifier;
         }
 
-        public Identifier Identifier { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitPrimaryIdentifier(this, arg);
+        }
     }
 
-    public abstract class PrimaryLiteral : Primary
+    public class PrimaryBoolyLiteral : Primary
     {
-    }
+        public BoolyLiteral Value { get; }
 
-    public class PrimaryBoolyLiteral : PrimaryLiteral
-    {
         public PrimaryBoolyLiteral(BoolyLiteral value)
         {
             Value = value;
         }
 
-        public BoolyLiteral Value { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitPrimaryBoolyLiteral(this, arg);
+        }
     }
 
-    public class PrimaryIntyLiteral : PrimaryLiteral
+    public class PrimaryIntyLiteral : Primary
     {
+        public IntyLiteral Value { get; }
+
         public PrimaryIntyLiteral(IntyLiteral value)
         {
             Value = value;
         }
 
-        public IntyLiteral Value { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitPrimaryIntyLiteral(this, arg);
+        }
     }
 
     public class PrimaryFunctionCall : Primary
     {
+        public FunctionCall FunctionCall { get; }
+
         public PrimaryFunctionCall(FunctionCall functionCall)
         {
             FunctionCall = functionCall;
         }
 
-        public FunctionCall FunctionCall { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitPrimaryFunctionCall(this, arg);
+        }
     }
 
     public class PrimaryExpression : Primary
     {
+        public Expression1 Expression { get; }
+
         public PrimaryExpression(Expression1 expression)
         {
             Expression = expression;
         }
 
-        public Expression1 Expression { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitPrimaryExpression(this, arg);
+        }
     }
 }

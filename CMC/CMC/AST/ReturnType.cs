@@ -6,15 +6,24 @@
 
     public class ReturnTypeVariableType : ReturnType
     {
+        public VariableType VariableType { get; }
+
         public ReturnTypeVariableType(VariableType variableType)
         {
             VariableType = variableType;
         }
 
-        public VariableType VariableType { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitReturnVariableType(this, arg);
+        }
     }
 
     public class ReturnTypeNothing : ReturnType
     {
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitReturnTypeNothing(this, arg);
+        }
     }
 }

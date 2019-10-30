@@ -5,12 +5,12 @@ namespace CMC.AST
 {
     public abstract class Terminal
     {
+        public string Spelling { get; }
+
         public Terminal(string spelling)
         {
             Spelling = spelling;
         }
-
-        public string Spelling { get; }
     }
 
     public class Operator1 : Terminal

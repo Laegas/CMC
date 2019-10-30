@@ -8,32 +8,47 @@ namespace CMC.AST
 
     public class DeclarationVariableDeclaration : Declaration
     {
+        public VariableDeclaration VariableDeclaration { get; }
+
         public DeclarationVariableDeclaration(VariableDeclaration variableDeclaration)
         {
             VariableDeclaration = variableDeclaration;
         }
 
-        public VariableDeclaration VariableDeclaration { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitDeclarationVariableDeclaration(this, arg);
+        }
     }
 
     public class DeclarationFunctionDeclaration : Declaration
     {
+        public FunctionDeclaration FunctionDeclaration { get; }
+
         public DeclarationFunctionDeclaration(FunctionDeclaration functionDeclaration)
         {
             FunctionDeclaration = functionDeclaration;
         }
 
-        public FunctionDeclaration FunctionDeclaration { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitDeclarationFunctionDeclaration(this, arg);
+        }
     }
 
     public class DeclarationStruct : Declaration
     {
+        public Struct Struct { get; }
+
         public DeclarationStruct(Struct @struct)
         {
             Struct = @struct;
         }
 
-        public Struct Struct { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitDeclarationStruct(this, arg);
+        }
     }
 
 
@@ -43,6 +58,10 @@ namespace CMC.AST
 
     public class VariableDeclarationSimple : VariableDeclaration
     {
+        public VariableType VariableType { get; }
+        public UserCreatableID VariableName { get; }
+        public Expression1 Expression { get; }
+
         public VariableDeclarationSimple(VariableType variableType, UserCreatableID variableName,
             Expression1 expression)
         {
@@ -51,34 +70,50 @@ namespace CMC.AST
             Expression = expression;
         }
 
-        public VariableType VariableType { get; }
-        public UserCreatableID VariableName { get; }
-        public Expression1 Expression { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitVariableDeclarationSimple(this, arg);
+        }
     }
 
     public class VariableDeclarationStructVariableDeclaration : VariableDeclaration
     {
+        public StructVariableDeclaration StructVariableDeclaration { get; }
+
         public VariableDeclarationStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration)
         {
             StructVariableDeclaration = structVariableDeclaration;
         }
 
-        public StructVariableDeclaration StructVariableDeclaration { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitVariableDeclarationStructVariableDeclaration(this, arg);
+        }
     }
 
 
     public class VariableDeclarationList : AST
     {
+        public List<VariableDeclaration> VariableDeclarations { get; }
+
         public VariableDeclarationList(List<VariableDeclaration> variableDeclarations)
         {
             VariableDeclarations = variableDeclarations;
         }
 
-        public List<VariableDeclaration> VariableDeclarations { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitVariableDeclarationList(this, arg);
+        }
     }
 
     public class FunctionDeclaration : AST
     {
+        public UserCreatableID FunctionName { get; }
+        public ParameterList ParameterList { get; }
+        public ReturnType ReturnType { get; }
+        public Statements Statements { get; }
+
         public FunctionDeclaration(UserCreatableID functionName, ParameterList parameterList, ReturnType returnType,
             Statements statements)
         {
@@ -88,9 +123,9 @@ namespace CMC.AST
             Statements = statements;
         }
 
-        public UserCreatableID FunctionName { get; }
-        public ParameterList ParameterList { get; }
-        public ReturnType ReturnType { get; }
-        public Statements Statements { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitFunctionDeclaration(this, arg);
+        }
     }
 }

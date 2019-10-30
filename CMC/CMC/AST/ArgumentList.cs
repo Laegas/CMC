@@ -10,6 +10,10 @@ namespace CMC.AST
         {
             Arguments = arguments;
         }
-    }
 
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitArgumentList(this, arg);
+        }
+    }
 }

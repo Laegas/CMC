@@ -4,11 +4,16 @@ namespace CMC.AST
 {
     public class Program : AST
     {
+        public List<Declaration> Declarations { get; }
+
         public Program(List<Declaration> declarations)
         {
             Declarations = declarations;
         }
 
-        public List<Declaration> Declarations { get; }
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitProgram(this, arg);
+        }
     }
 }
