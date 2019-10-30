@@ -117,14 +117,14 @@ namespace CMC
             if (_currentToken.TheTokenType.Equals(Token.TokenType.NOTHING))
             {
                 Accept(Token.TokenType.NOTHING);
-                return new ParameterListNothing();
+                return new ParameterList(new List<(VariableType parameterType, UserCreatableID parameterName)>());
             }
 
             if (_currentToken.TheTokenType.Equals(Token.TokenType.VARIABLE_TYPE))
             {
-                var firstParameterType = new VariableType(Accept(Token.TokenType.VARIABLE_TYPE));
-                var firstParameterName = new UserCreatableID(Accept(Token.TokenType.USER_CREATABLE_ID));
                 var otherParameters = new List<(VariableType, UserCreatableID)>();
+                otherParameters.Add((new VariableType(Accept(Token.TokenType.VARIABLE_TYPE)),
+                    new UserCreatableID(Accept(Token.TokenType.USER_CREATABLE_ID))));
                 while (_currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
                 {
                     Accept(Token.TokenType.COMMA);
@@ -132,7 +132,7 @@ namespace CMC
                         new UserCreatableID(Accept(Token.TokenType.USER_CREATABLE_ID))));
                 }
 
-                return new ParameterListSimple((firstParameterType, firstParameterName), otherParameters);
+                return new ParameterList(otherParameters);
             }
 
             throw VeryGenericException("Exception in parse parameter list");
@@ -323,21 +323,23 @@ namespace CMC
 
         private ArgumentList ParseArgumentList()
         {
+            var expressions = new List<Expression1>();
+
             if (Token.TokenType.NOTHING == _currentToken.TheTokenType)
             {
                 Accept(Token.TokenType.NOTHING);
-                return new ArgumentListNothing();
             }
-
-            Expression1 firstExpression = ParseExpression1();
-            var otherExpressions = new List<Expression1>();
-            while (_currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
+            else
             {
-                Accept(Token.TokenType.COMMA);
-                otherExpressions.Add(ParseExpression1());
+                expressions.Add(ParseExpression1());
+                while (_currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
+                {
+                    Accept(Token.TokenType.COMMA);
+                    expressions.Add(ParseExpression1());
+                }
             }
 
-            return new ArgumentListSimple(firstExpression, otherExpressions);
+            return new ArgumentList(expressions);
         }
 
         private FunctionCall ParseFunctionCall()

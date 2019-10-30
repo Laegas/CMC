@@ -2,24 +2,14 @@
 
 namespace CMC.AST
 {
-    public abstract class ParameterList
+    public class ParameterList : AST
     {
-    }
+        public List<(VariableType parameterType, UserCreatableID parameterName)> Parameters { get; }
 
-    public class ParameterListSimple : ParameterList
-    {
-        public ParameterListSimple((VariableType, UserCreatableID) parameter,
-            List<(VariableType, UserCreatableID)> otherParameters)
+        public ParameterList(List<(VariableType parameterType, UserCreatableID parameterName)> parameters)
         {
-            Parameter = parameter;
-            OtherParameters = otherParameters;
+            Parameters = parameters;
         }
-
-        public (VariableType parameterType, UserCreatableID parameterName) Parameter { get; }
-        public List<(VariableType parameterType, UserCreatableID parameterName)> OtherParameters { get; }
     }
 
-    public class ParameterListNothing : ParameterList
-    {
-    }
 }

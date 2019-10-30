@@ -2,23 +2,14 @@
 
 namespace CMC.AST
 {
-    public abstract class ArgumentList
+    public class ArgumentList : AST
     {
-    }
+        public List<Expression1> Arguments { get; }
 
-    public class ArgumentListNothing : ArgumentList
-    {
-    }
-
-    public class ArgumentListSimple : ArgumentList
-    {
-        public ArgumentListSimple(Expression1 firstExpression, List<Expression1> otherExpressions)
+        public ArgumentList(List<Expression1> arguments)
         {
-            FirstExpression = firstExpression;
-            OtherExpressions = otherExpressions;
+            Arguments = arguments;
         }
-
-        public Expression1 FirstExpression { get; }
-        public List<Expression1> OtherExpressions { get; }
     }
+
 }
