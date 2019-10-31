@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace CMC
 {
@@ -10,8 +11,9 @@ namespace CMC
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);
-            parser.ParseProgram();
-            var scanner = new Scanner(sourceFile);
+            var program = parser.ParseProgram();
+            var output = JsonConvert.SerializeObject(program, Formatting.Indented);
+            //var scanner = new Scanner(sourceFile);
             //while( true )
             //{
             //    var token = scanner.ScanToken();
@@ -21,6 +23,7 @@ namespace CMC
             //        break;
             //    }
             //}
+            Console.WriteLine(output);
             Console.WriteLine("\n\nFinished parsing file");
 
 
