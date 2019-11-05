@@ -1,31 +1,59 @@
 ﻿using CMC.AST;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMC
 {
+
+
+
     public class Checker : IASTVisitor
     {
+
+        private IDTable idTable = new IDTable();
+
+
+
         public object VisitArgumentList(ArgumentList argumentList, object o)
         {
-            throw new System.NotImplementedException();
+            ParameterList x = o as ParameterList;
+
+            for(int i = 0; i < argumentList.Arguments.Count; i++ )
+            {
+                argumentList.Arguments[ i ].Visit( this, x.Parameters[ i ].ParameterType ); //TODO WHAT SHOULD WE DO WITH THE RETURNM VALUE
+            }
+            return null;
         }
 
         public object VisitDeclarationVariableDeclaration(DeclarationVariableDeclaration declarationVariableDeclaration, object o)
         {
+            // here we don't need external information
+
+            //but we will store something into the scope table
             throw new System.NotImplementedException();
         }
 
         public object VisitDeclarationFunctionDeclaration(DeclarationFunctionDeclaration declarationFunctionDeclaration, object o)
         {
+            // here we don't need external information
+
+            //but we will store something into the scope table
             throw new System.NotImplementedException();
         }
 
         public object VisitDeclarationStruct(DeclarationStruct declarationStruct, object o)
         {
+            // here we don't need external information
+
+            //but we will store something into the scope table
             throw new System.NotImplementedException();
         }
 
         public object VisitVariableDeclarationSimple(VariableDeclarationSimple variableDeclarationSimple, object o)
         {
+            // here we don't need external information
+
+            //but we will store something into the scope table
             throw new System.NotImplementedException();
         }
 
@@ -42,7 +70,17 @@ namespace CMC
 
         public object VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object o)
         {
-            throw new System.NotImplementedException();
+            idTable.Add( functionDeclaration.FunctionName, functionDeclaration );
+
+            idTable.EnterNestedScopeLevel();
+
+            functionDeclaration.ParameterList.Visit( this );
+            //functionDeclaration.ReturnType.Visit( this ); // this must store what the return type must be on the ID table
+            functionDeclaration.Statements.Visit( this,  functionDeclaration.ReturnType);
+
+            idTable.ExitNestedScopeLevel();
+
+            return null;
         }
 
         public object VisitExpression1(Expression1 expression1, object o)
@@ -62,8 +100,13 @@ namespace CMC
 
         public object VisitParameterList(ParameterList parameterList, object o)
         {
-            throw new System.NotImplementedException();
+            foreach(var item in parameterList.Parameters )
+            {
+                idTable.Add( item.ParameterName, item );
+            }
+            return null;
         }
+
 
         public object VisitPrimaryIdentifier(PrimaryIdentifier primaryIdentifier, object o)
         {
@@ -97,11 +140,13 @@ namespace CMC
 
         public object VisitReturnVariableType(ReturnTypeVariableType returnTypeVariableType, object o)
         {
+            //WE DONT THINK THIS IS USED
             throw new System.NotImplementedException();
         }
 
         public object VisitReturnTypeNothing(ReturnTypeNothing returnTypeNothing, object o)
         {
+            //WE DONT THINK THIS IS USED
             throw new System.NotImplementedException();
         }
 
@@ -147,12 +192,61 @@ namespace CMC
 
         public object VisitStruct(Struct @struct, object o)
         {
+
             throw new System.NotImplementedException();
         }
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
+            // here we don't need external information
+
+            //but we will store something into the scope table
             throw new System.NotImplementedException();
         }
+
+        public object VisitParameter( Parameter visitor, object o )
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private class IDTable
+        {
+            private List<(int scopeLevel, UserCreatableID ID, AST.AST subTreePointer)> enviornment;
+            private int _currentScopeLevel;
+
+            public IDTable( )
+            {
+                _currentScopeLevel = 1;
+                enviornment = new List<(int scopeLevel, UserCreatableID ID, AST.AST subTreePointer)>();
+            }
+            
+            public void Add( UserCreatableID ID, AST.AST subTreePointer) {
+                enviornment.Add( (_currentScopeLevel, ID, subTreePointer) );
+            }
+
+            public AST.AST Lookup( UserCreatableID ID )
+            {
+                var lst = enviornment.FindAll( item => item.ID.Spelling == ID.Spelling );
+                var max = lst.Max( item => item.scopeLevel );
+                
+                return lst.Find( item => item.scopeLevel == max ).subTreePointer;
+            }
+
+            public void EnterNestedScopeLevel()
+            {
+                _currentScopeLevel++;
+            }
+            public void ExitNestedScopeLevel()
+            {
+                _currentScopeLevel--;
+                enviornment.RemoveAll( item => item.scopeLevel > _currentScopeLevel );
+            }
+
+
+
+
+        }
+
+
     }
 }
