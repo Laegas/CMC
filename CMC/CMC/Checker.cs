@@ -36,10 +36,8 @@ namespace CMC
         public object VisitDeclarationFunctionDeclaration(DeclarationFunctionDeclaration declarationFunctionDeclaration,
             object o)
         {
-            // here we don't need external information
-
-            //but we will store something into the scope table
-            throw new System.NotImplementedException();
+            declarationFunctionDeclaration.FunctionDeclaration.Visit(this, null);
+            return null;
         }
 
         public object VisitDeclarationStruct(DeclarationStruct declarationStruct, object o)
@@ -52,16 +50,15 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple(VariableDeclarationSimple variableDeclarationSimple, object o)
         {
-            // here we don't need external information
-
-            //but we will store something into the scope table
-            throw new System.NotImplementedException();
+            idTable.Add(variableDeclarationSimple.VariableName, variableDeclarationSimple, IDTable.DeclarationType.VARIABLE);
+            return null;
         }
 
         public object VisitVariableDeclarationStructVariableDeclaration(
             VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o)
         {
-            throw new System.NotImplementedException();
+            variableDeclarationStructVariableDeclaration.StructVariableDeclaration.Visit(this, null);
+            return null;
         }
 
         public object VisitVariableDeclarationList(VariableDeclarationList variableDeclarationList, object o)
@@ -71,7 +68,7 @@ namespace CMC
 
         public object VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object o)
         {
-            idTable.Add(functionDeclaration.FunctionName, functionDeclaration);
+            idTable.Add(functionDeclaration.FunctionName, functionDeclaration, IDTable.DeclarationType.FUNCTION);
 
             idTable.EnterNestedScopeLevel();
 
@@ -101,33 +98,31 @@ namespace CMC
 
         public object VisitParameterList(ParameterList parameterList, object o)
         {
-            foreach (var item in parameterList.Parameters)
-            {
-                idTable.Add(item.ParameterName, item);
-            }
-
+            //this is all it needs to be, we think
             return null;
         }
 
 
         public object VisitPrimaryIdentifier(PrimaryIdentifier primaryIdentifier, object o)
         {
-            throw new System.NotImplementedException();
+            return primaryIdentifier.Identifier.Visit(this, null);
+            
         }
 
         public object VisitPrimaryBoolyLiteral(PrimaryBoolyLiteral primaryBoolyLiteral, object o)
         {
-            throw new System.NotImplementedException();
+            return VariableType.VariableTypeEnum.BOOLY;
         }
 
         public object VisitPrimaryIntyLiteral(PrimaryIntyLiteral primaryIntyLiteral, object o)
         {
-            throw new System.NotImplementedException();
+            return VariableType.VariableTypeEnum.INTY;
         }
 
         public object VisitPrimaryFunctionCall(PrimaryFunctionCall primaryFunctionCall, object o)
         {
-            throw new System.NotImplementedException();
+            primaryFunctionCall.FunctionCall.Visit(this, o);
+            return null;
         }
 
         public object VisitPrimaryExpression(PrimaryExpression primaryExpression, object o)
@@ -238,7 +233,8 @@ namespace CMC
         public object VisitStatementVariableDeclaration(StatementVariableDeclaration statementVariableDeclaration,
             object o)
         {
-            throw new System.NotImplementedException();
+            statementVariableDeclaration.VariableDeclaration.Visit(this, null);
+            return null;
         }
 
         public object VisitStatementAssignment(StatementAssignment statementAssignment, object o)
@@ -248,20 +244,20 @@ namespace CMC
 
         public object VisitStatementFunctionCall(StatementFunctionCall statementFunctionCall, object o)
         {
-            throw new System.NotImplementedException();
+            statementFunctionCall.FunctionCall.Visit(this, null);
+            return null;
         }
 
         public object VisitStruct(Struct @struct, object o)
         {
-            throw new System.NotImplementedException();
+            idTable.Add(@struct.StructName, @struct, IDTable.DeclarationType.STRUCT);
+            return null;
         }
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
-            // here we don't need external information
-
-            //but we will store something into the scope table
-            throw new System.NotImplementedException();
+            idTable.Add(structVariableDeclaration.VariableName, structVariableDeclaration, IDTable.DeclarationType.VARIABLE);
+            return null;
         }
 
         public object VisitParameter(Parameter visitor, object o)
@@ -269,21 +265,80 @@ namespace CMC
             throw new System.NotImplementedException();
         }
 
+        public object VisitFunctionCall(FunctionCall functionCall, object o)
+        {
+            FunctionDeclaration dec = (FunctionDeclaration)idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
+
+            functionCall.ArgumentList.Visit(this, dec.ParameterList);
+
+            return null;
+        }
+
+        public object VisitIdentifier(Identifier identifier, object o)
+        {
+            if (identifier.NestedIDs.Any())
+            { 
+                // lookup type by struct
+                var lookedUp = (Struct)idTable.Lookup(identifier.RootID, IDTable.DeclarationType.STRUCT);
+
+
+                if(identifier.NestedIDs.Count == 1)
+                {
+                    var where = lookedUp.VariableDeclarationList.VariableDeclarations.Where(dec => ((VariableDeclarationSimple)dec).VariableName.Spelling == identifier.NestedIDs[0].Spelling);
+
+                    if(where.Count() != 1)
+                    {
+                        throw new Exception("hould not happen");
+                    }
+                    else
+                    {
+
+                        return where.First() // variable type
+                    }
+                    
+                }
+                else
+                {
+                    var rootID = identifier.NestedIDs[0];
+                    identifier.NestedIDs.RemoveAt(0);
+                    var iden = new Identifier(rootID, identifier.NestedIDs);
+                    return iden.Visit(this, null);
+                }
+            }
+            else
+            {
+                var lookedUp = (VariableDeclarationSimple)idTable.Lookup(identifier.RootID, IDTable.DeclarationType.VARIABLE);
+
+                return lookedUp.VariableType;
+            }
+            throw new NotImplementedException();
+        }
+
         private class IDTable
         {
-            private List<(int scopeLevel, UserCreatableID ID, AST.AST subTreePointer)> enviornment;
+            private List<(UserCreatableID structName, Struct @struct)> definedStructs;
+            private List<(int scopeLevel, UserCreatableID  ID,    DeclarationType type ,  AST.AST subTreePointer)> enviornment;
             private List<bool> isLoopScopeList = new List<bool>();
             private int _currentScopeLevel;
 
+
+            public enum DeclarationType { STRUCT, FUNCTION, VARIABLE }
             public IDTable()
             {
                 _currentScopeLevel = 1;
-                enviornment = new List<(int scopeLevel, UserCreatableID ID, AST.AST subTreePointer)>();
+                enviornment = new List<(int scopeLevel, UserCreatableID ID,DeclarationType type ,AST.AST subTreePointer)>();
             }
 
-            public void Add(UserCreatableID ID, AST.AST subTreePointer)
+            public void Add(UserCreatableID ID, AST.AST subTreePointer, DeclarationType type)
             {
-                enviornment.Add((_currentScopeLevel, ID, subTreePointer));
+                if(enviornment.Any(env => env.scopeLevel == _currentScopeLevel && env.ID.Spelling == ID.Spelling && env.type == type))
+                {
+                    throw new Exception("ID already defined for current scope level");
+                }
+                else
+                {
+                    enviornment.Add((_currentScopeLevel, ID, type, subTreePointer));
+                }
             }
 
             public bool IsInLoopScope()
@@ -291,12 +346,21 @@ namespace CMC
                 return isLoopScopeList.Any(x => x == true);
             }
 
-            public AST.AST Lookup(UserCreatableID ID)
+            public AST.AST Lookup(UserCreatableID ID, DeclarationType type)
             {
-                var lst = enviornment.FindAll(item => item.ID.Spelling == ID.Spelling);
-                var max = lst.Max(item => item.scopeLevel);
+                var lst = enviornment.FindAll(item => item.ID.Spelling == ID.Spelling && item.type == type);
 
-                return lst.Find(item => item.scopeLevel == max).subTreePointer;
+                if(lst.Count == 0)
+                {
+                    throw new Exception("Nothing found in lookup exception");
+                }
+                else
+                {
+                    var max = lst.Max(item => item.scopeLevel);
+                    var result = lst.Find(item => item.scopeLevel == max);
+                    return result.subTreePointer;
+                }
+
             }
 
             public void EnterNestedScopeLevel(bool isLoopScope = false)

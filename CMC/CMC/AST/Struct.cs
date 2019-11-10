@@ -2,6 +2,8 @@
 {
     public class Struct : AST
     {
+
+
         public UserCreatableID StructName { get; }
         public VariableDeclarationList VariableDeclarationList { get; }
 
