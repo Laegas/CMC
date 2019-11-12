@@ -36,5 +36,9 @@ namespace CMC
         object VisitStruct(Struct @struct, object o);
         object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o);
 
+        object VisitFunctionCall(FunctionCall functionCall, object o);
+        object VisitIdentifier(Identifier identifier, object o);
+
+
     }
 }

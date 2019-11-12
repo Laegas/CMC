@@ -2,7 +2,7 @@
 
 namespace CMC.AST
 {
-    public class Identifier
+    public class Identifier : AST
     {
         public UserCreatableID RootID { get; }
         public List<UserCreatableID> NestedIDs { get; }
@@ -11,6 +11,11 @@ namespace CMC.AST
         {
             RootID = rootId;
             NestedIDs = nestedIDs;
+        }
+
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitIdentifier(this, arg);
         }
     }
 }

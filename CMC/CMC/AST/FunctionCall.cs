@@ -1,6 +1,6 @@
 ﻿namespace CMC.AST
 {
-    public class FunctionCall
+    public class FunctionCall : AST
     {
         public UserCreatableID FunctionName { get; }
         public ArgumentList ArgumentList { get; }
@@ -9,6 +9,11 @@
         {
             FunctionName = functionName;
             ArgumentList = argumentList;
+        }
+
+        public override object Visit(IASTVisitor visitor, object arg = null)
+        {
+            return visitor.VisitFunctionCall(this, arg);
         }
     }
 }

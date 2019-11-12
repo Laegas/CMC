@@ -117,18 +117,18 @@ namespace CMC
             if (_currentToken.TheTokenType.Equals(Token.TokenType.NOTHING))
             {
                 Accept(Token.TokenType.NOTHING);
-                return new ParameterList(new List<(VariableType parameterType, UserCreatableID parameterName)>());
+                return new ParameterList(new List<Parameter>());
             }
 
             if (_currentToken.TheTokenType.Equals(Token.TokenType.VARIABLE_TYPE))
             {
-                var otherParameters = new List<(VariableType, UserCreatableID)>();
-                otherParameters.Add((new VariableType(Accept(Token.TokenType.VARIABLE_TYPE)),
+                var otherParameters = new List<Parameter>();
+                otherParameters.Add(new Parameter(new VariableType(Accept(Token.TokenType.VARIABLE_TYPE)),
                     new UserCreatableID(Accept(Token.TokenType.USER_CREATABLE_ID))));
                 while (_currentToken.TheTokenType.Equals(Token.TokenType.COMMA))
                 {
                     Accept(Token.TokenType.COMMA);
-                    otherParameters.Add((new VariableType(Accept(Token.TokenType.VARIABLE_TYPE)),
+                    otherParameters.Add(new Parameter(new VariableType(Accept(Token.TokenType.VARIABLE_TYPE)),
                         new UserCreatableID(Accept(Token.TokenType.USER_CREATABLE_ID))));
                 }
 
