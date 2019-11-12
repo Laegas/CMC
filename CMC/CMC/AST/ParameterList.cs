@@ -30,7 +30,7 @@ namespace CMC.AST
 
         public override object Visit( IASTVisitor visitor, object arg = null )
         {
-            visitor.VisitParameter(this, arg);
+            return visitor.VisitParameter(this, arg);
         }
     }
 }
