@@ -54,6 +54,7 @@ namespace CMC.AST
 
     public abstract class VariableDeclaration : AST
     {
+        public abstract UserCreatableID Name{ get; }
     }
 
     public class VariableDeclarationSimple : VariableDeclaration
@@ -61,6 +62,8 @@ namespace CMC.AST
         public VariableType VariableType { get; }
         public UserCreatableID VariableName { get; }
         public Expression1 Expression { get; }
+
+        public override UserCreatableID Name => VariableName;
 
         public VariableDeclarationSimple(VariableType variableType, UserCreatableID variableName,
             Expression1 expression)
@@ -79,6 +82,8 @@ namespace CMC.AST
     public class VariableDeclarationStructVariableDeclaration : VariableDeclaration
     {
         public StructVariableDeclaration StructVariableDeclaration { get; }
+
+        public override UserCreatableID Name => StructVariableDeclaration.StructName;
 
         public VariableDeclarationStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration)
         {
