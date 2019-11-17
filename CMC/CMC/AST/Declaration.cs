@@ -83,7 +83,7 @@ namespace CMC.AST
     {
         public StructVariableDeclaration StructVariableDeclaration { get; }
 
-        public override UserCreatableID Name => StructVariableDeclaration.StructName;
+        public override UserCreatableID Name => StructVariableDeclaration.VariableName;
 
         public VariableDeclarationStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration)
         {
