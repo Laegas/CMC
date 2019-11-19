@@ -65,19 +65,20 @@ namespace CMC.AST
 
     public class VariableType : Terminal
     {
-        public enum VariableTypeEnum
+
+        public enum ValueTypeEnum
         {
-            INTY, BOOLY
+            INTY, BOOLY, NOTHING
         }
         
-        public VariableTypeEnum VariableType_ { get; }
+        public ValueTypeEnum VariableType_ { get; }
         
         public VariableType(Token token) : base(token.Spelling)
         {
             CheckTokenType(Token.TokenType.VARIABLE_TYPE, token.TheTokenType);
             VariableType_ = token.TheTokenType == Token.TokenType.BOOLY_LITERAL
-                ? VariableTypeEnum.BOOLY
-                : VariableTypeEnum.INTY;
+                ? ValueTypeEnum.BOOLY
+                : ValueTypeEnum.INTY;
         }
     }
 

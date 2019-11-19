@@ -101,18 +101,125 @@ namespace CMC
 
         public object VisitExpression1( Expression1 expression1, object o )
         {
-            // must return the type of the literal that it evaluates to
-            throw new System.NotImplementedException();
+            if(expression1.Operator1 != null )
+            {
+                var t1 = (VariableType.ValueTypeEnum)expression1.Expression2.Visit(this);
+                var t2 = (VariableType.ValueTypeEnum)expression1.Expression1_.Visit( this );
+
+                if(t1 != t2 )
+                {
+                    throw new Exception( "Value type for operands in 'is' operator not the same" );
+                }
+                if(t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING )
+                {
+                    throw new Exception( "<Nothing> not a valid operand for 'is' operator" );
+                }
+                return VariableType.ValueTypeEnum.BOOLY;
+            }
+            else
+            {
+                return expression1.Expression2.Visit( this );
+            }
         }
 
         public object VisitExpression2( Expression2 expression2, object o )
         {
-            throw new System.NotImplementedException();
+
+            if(expression2.Operator2 == null )
+            {
+                return expression2.Expression3.Visit( this );
+            }
+
+
+            var lv2IntyOpr = new List<string>() { "+", "-" };
+
+            var t1 = (VariableType.ValueTypeEnum)expression2.Expression1.Visit( this );
+            var t2 = (VariableType.ValueTypeEnum)expression2.Expression3.Visit( this );
+
+            if( t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING )
+            {
+                throw new Exception( "<Nothing> not a valid operand for "  + expression2.Operator2.Spelling + " operator" );
+            }
+
+            if(t1 != t2 )
+            {
+                throw new Exception( "The operands for a Operator2 operator must be of same type" );
+            }
+
+            if( lv2IntyOpr.Contains( expression2.Operator2.Spelling ) )
+            {
+                if(t1 == VariableType.ValueTypeEnum.INTY )
+                {
+                    return VariableType.ValueTypeEnum.INTY;
+                }
+                else
+                {
+                    throw new Exception( "Operator " + expression2.Operator2.Spelling + " expexted inty operands" );
+                }
+            }
+            else if( "or".Equals( expression2.Operator2.Spelling ) )
+            {
+                if( t1 == VariableType.ValueTypeEnum.BOOLY)
+                {
+                    return VariableType.ValueTypeEnum.BOOLY;
+                }
+                else
+                {
+                    throw new Exception( "Operator " + expression2.Operator2.Spelling + " expexted booly operands" );
+                }
+            }
+
+            throw new Exception( "Something bad happened, code: 98465+4865" );
+
         }
 
         public object VisitExpression3( Expression3 expression3, object o )
         {
-            throw new System.NotImplementedException();
+            if( expression3.Operator3 == null )
+            {
+                return expression3.Primary.Visit( this );
+            }
+
+
+            var lv3IntyOpr = new List<string>() { "*", "/" };
+
+            var t1 = (VariableType.ValueTypeEnum)expression3.Expression1.Visit( this );
+            var t2 = (VariableType.ValueTypeEnum)expression3.Primary.Visit( this );
+
+            if( t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING )
+            {
+                throw new Exception( "<Nothing> not a valid operand for " + expression3.Operator3.Spelling + " operator" );
+            }
+
+            if( t1 != t2 )
+            {
+                throw new Exception( "The operands for a Operator3 operator must be of same type" );
+            }
+
+            if( lv3IntyOpr.Contains( expression3.Operator3.Spelling ) )
+            {
+                if( t1 == VariableType.ValueTypeEnum.INTY )
+                {
+                    return VariableType.ValueTypeEnum.INTY;
+                }
+                else
+                {
+                    throw new Exception( "Operator " + expression3.Operator3.Spelling + " expexted inty operands" );
+                }
+            }
+            else if( "and".Equals( expression3.Operator3.Spelling ) )
+            {
+                if( t1 == VariableType.ValueTypeEnum.BOOLY )
+                {
+                    return VariableType.ValueTypeEnum.BOOLY;
+                }
+                else
+                {
+                    throw new Exception( "Operator " + expression3.Operator3.Spelling + " expected booly operands" );
+                }
+            }
+
+            throw new Exception( "Something bad happened, code: 32546863135" );
         }
 
         public object VisitParameterList( ParameterList parameterList, object o )
@@ -128,29 +235,30 @@ namespace CMC
 
         public object VisitPrimaryIdentifier( PrimaryIdentifier primaryIdentifier, object o )
         {
-            return primaryIdentifier.Identifier.Visit( this, null );
+            return primaryIdentifier.Identifier.Visit( this );
 
         }
 
         public object VisitPrimaryBoolyLiteral( PrimaryBoolyLiteral primaryBoolyLiteral, object o )
         {
-            return VariableType.VariableTypeEnum.BOOLY;
+            return VariableType.ValueTypeEnum.BOOLY;
         }
 
         public object VisitPrimaryIntyLiteral( PrimaryIntyLiteral primaryIntyLiteral, object o )
         {
-            return VariableType.VariableTypeEnum.INTY;
+            return VariableType.ValueTypeEnum.INTY;
         }
 
         public object VisitPrimaryFunctionCall( PrimaryFunctionCall primaryFunctionCall, object o )
         {
-            primaryFunctionCall.FunctionCall.Visit( this, o );
-            return null;
+            var funcDec = (FunctionDeclaration)idTable.Lookup( primaryFunctionCall.FunctionCall.FunctionName, IDTable.DeclarationType.FUNCTION );
+
+            return funcDec.ReturnType.ValueType;
         }
 
         public object VisitPrimaryExpression( PrimaryExpression primaryExpression, object o )
         {
-            throw new System.NotImplementedException();
+            return primaryExpression.Expression.Visit( this );
         }
 
         public object VisitProgram( AST.Program program, object o )
@@ -176,7 +284,7 @@ namespace CMC
             idTable.EnterNestedScopeLevel();
 
             var variableType = (VariableType)statementIfStatement.Condition.Visit( this );
-            if( variableType.VariableType_ != VariableType.VariableTypeEnum.BOOLY )
+            if( variableType.VariableType_ != VariableType.ValueTypeEnum.BOOLY )
             {
                 throw new Exception( "If statement condition must evaluate to booly value" );
             }
@@ -193,7 +301,7 @@ namespace CMC
             idTable.EnterNestedScopeLevel( true );
 
             var variableType = (VariableType)statementLoopStatement.Condition.Visit( this );
-            if( variableType.VariableType_ != VariableType.VariableTypeEnum.BOOLY )
+            if( variableType.VariableType_ != VariableType.ValueTypeEnum.BOOLY )
             {
                 throw new Exception( "Loop statement condition must evaluate to a booly value" );
             }
@@ -261,10 +369,12 @@ namespace CMC
             return null;
         }
 
+        //identifier already in the table
         public object VisitStatementAssignment( StatementAssignment statementAssignment, object o )
         {
-            VariableType literalType = (VariableType)statementAssignment.Expression.Visit( this, null );
+            var literalType = (VariableType.ValueTypeEnum)statementAssignment.Expression.Visit( this );
 
+            idTable.Lookup( statementAssignment.Identifier, IDTable.DeclarationType.VARIABLE );
 
 
             if( literalType.VariableType_ != statementAssignment.)
@@ -311,58 +421,64 @@ namespace CMC
             return null;
         }
 
+        /// <summary>
+        /// Is goiong to return VariableType.ValueTypeEnum
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="o"></param>
+        /// <returns></returns>
         public object VisitIdentifier( Identifier identifier, object o )
         {
-            if( identifier.NestedIDs.Any() )
-            {  // identifier for struct's value
+            //if( identifier.NestedIDs.Any() )
+            //{  // identifier for struct's value
 
-                // lookup type by struct
-                var lookedUp = (Struct)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.STRUCT );
+            //    // lookup type by struct
+            //    var lookedUp = (Struct)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.STRUCT );
 
 
-                if( identifier.NestedIDs.Count == 1 )
-                { // pointing to inty / booly
-                    var where = lookedUp.VariableDeclarationList.VariableDeclarations.Where( dec => ( (VariableDeclarationSimple)dec ).VariableName.Spelling == identifier.NestedIDs[ 0 ].Spelling );
+            //    if( identifier.NestedIDs.Count == 1 )
+            //    { // pointing to inty / booly
+            //        var where = lookedUp.VariableDeclarationList.VariableDeclarations.Where( dec => ( (VariableDeclarationSimple)dec ).VariableName.Spelling == identifier.NestedIDs[ 0 ].Spelling );
 
-                    if( where.Count() != 1 )
-                    {
-                        throw new Exception( "hould not happen" );
-                    }
-                    else
-                    {
+            //        if( where.Count() != 1 )
+            //        {
+            //            throw new Exception( "hould not happen" );
+            //        }
+            //        else
+            //        {
 
-                        return where.First() // variable type
-                    }
+            //            return where.First() // variable type
+            //        }
 
-                    //hello.otherStruct.hello1
+            //        //hello.otherStruct.hello1
 
-                    //    cook Struct1 hello;
-                    //    cook Struct2 other;
-                    //hello.otherStruct = other;
-                    //kebab Struct1[
-                    //        Struct2 otherStruct;
-                    //        ]
-                    //kebab Struct2[
-                    //        booly ThisIsBooly;
-                    //        ]
+            //        //    cook Struct1 hello;
+            //        //    cook Struct2 other;
+            //        //hello.otherStruct = other;
+            //        //kebab Struct1[
+            //        //        Struct2 otherStruct;
+            //        //        ]
+            //        //kebab Struct2[
+            //        //        booly ThisIsBooly;
+            //        //        ]
 
-                }
-                else
-                { // pointing to another struct
+            //    }
+            //    else
+            //    { // pointing to another struct
 
-                    var rootID = identifier.NestedIDs[ 0 ];
-                    identifier.NestedIDs.RemoveAt( 0 );
-                    var iden = new Identifier( rootID, identifier.NestedIDs );
-                    return iden.Visit( this, null );
-                }
-            }
-            else
-            {
-                var lookedUp = (VariableDeclarationSimple)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.VARIABLE );
+            //        var rootID = identifier.NestedIDs[ 0 ];
+            //        identifier.NestedIDs.RemoveAt( 0 );
+            //        var iden = new Identifier( rootID, identifier.NestedIDs );
+            //        return iden.Visit( this, null );
+            //    }
+            //}
+            //else
+            //{
+            //    var lookedUp = (VariableDeclarationSimple)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.VARIABLE );
 
-                return lookedUp.VariableType;
-            }
-            throw new NotImplementedException();
+            //    return lookedUp.VariableType;
+            //}
+            //throw new NotImplementedException();
         }
 
         private class IDTable
