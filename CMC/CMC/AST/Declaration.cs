@@ -52,7 +52,7 @@ namespace CMC.AST
     }
 
 
-    public abstract class VariableDeclaration : AST
+    public abstract class VariableDeclaration : Declaration
     {
         public abstract UserCreatableID Name{ get; }
     }

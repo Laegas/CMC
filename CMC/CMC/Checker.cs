@@ -26,7 +26,9 @@ namespace CMC
 
                 if (typeOfValueReturnedByExpression.VariableType_ == parameterList.Parameters[i].ParameterType.VariableType_)
                 {// bind to idTable
-                    idTable.Add(parameterList.Parameters[i].ParameterName, argumentList.Arguments[i], IDTable.DeclarationType.VARIABLE);
+                    var decl = new VariableDeclarationSimple(parameterList.Parameters[i].ParameterType,
+                        parameterList.Parameters[i].ParameterName, argumentList.Arguments[i]);
+                    idTable.Add(parameterList.Parameters[i].ParameterName, decl, IDTable.DeclarationType.VARIABLE);
                 }
                 else
                 {
@@ -59,6 +61,7 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple(VariableDeclarationSimple variableDeclarationSimple, object o)
         {
+            variableDeclarationSimple.VariableName.decl = new DeclarationVariableDeclaration(variableDeclarationSimple);
             idTable.Add(variableDeclarationSimple.VariableName, variableDeclarationSimple,
                 IDTable.DeclarationType.VARIABLE);
 
@@ -104,7 +107,7 @@ namespace CMC
 
         public object VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object o)
         {
-            idTable.Add(functionDeclaration.FunctionName, functionDeclaration, IDTable.DeclarationType.FUNCTION);
+            idTable.Add(functionDeclaration.FunctionName, new DeclarationFunctionDeclaration(functionDeclaration), IDTable.DeclarationType.FUNCTION);
 
             idTable.EnterNestedScopeLevel(expectedReturnType: functionDeclaration.ReturnType.ValueType);
 
@@ -392,7 +395,7 @@ namespace CMC
         {
             var literalType = (VariableType.ValueTypeEnum)statementAssignment.Expression.Visit(this);
 
-            var declaration = (VariableDeclaration)idTable.Lookup(statementAssignment.Identifier, IDTable.DeclarationType.VARIABLE);
+            var declaration = idTable.Lookup(statementAssignment.Identifier, IDTable.DeclarationType.VARIABLE).decl;
 
             if (declaration is VariableDeclarationSimple declarationSimple)
             {
@@ -414,29 +417,29 @@ namespace CMC
 
         public object VisitStruct(Struct @struct, object o)
         {
-            idTable.Add(@struct.StructName, @struct, IDTable.DeclarationType.STRUCT);
+            idTable.Add(@struct.StructName, new DeclarationStruct(@struct), IDTable.DeclarationType.STRUCT);
             return null;
         }
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
-            idTable.Add(structVariableDeclaration.VariableName, structVariableDeclaration, IDTable.DeclarationType.VARIABLE);
+            idTable.Add(structVariableDeclaration.VariableName, new VariableDeclarationStructVariableDeclaration(structVariableDeclaration), IDTable.DeclarationType.VARIABLE);
             return null;
         }
 
         public object VisitParameter(Parameter parameter, object o)
         {
-            idTable.Add(parameter.ParameterName, parameter, IDTable.DeclarationType.VARIABLE);
+            var decl = new VariableDeclarationSimple(parameter.ParameterType, parameter.ParameterName, null);
+            idTable.Add(parameter.ParameterName, decl, IDTable.DeclarationType.VARIABLE);
             return null;
         }
 
         public object VisitFunctionCall(FunctionCall functionCall, object o)
         {
-            FunctionDeclaration dec = (FunctionDeclaration)idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
+            functionCall.FunctionName = idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
+            FunctionDeclaration dec = ((DeclarationFunctionDeclaration)functionCall.FunctionName.decl).FunctionDeclaration;
 
             functionCall.ArgumentList.Visit(this, dec.ParameterList);
-
-            // TODO decorate tree
 
             return null;
         }
@@ -449,8 +452,15 @@ namespace CMC
         /// <returns></returns>
         public object VisitIdentifier(Identifier identifier, object o)
         {
-            var simpleVar = (VariableDeclarationSimple)idTable.Lookup(identifier, IDTable.DeclarationType.VARIABLE);
-            return simpleVar.VariableType.VariableType_;
+            var userCreatableId = idTable.Lookup(identifier, IDTable.DeclarationType.VARIABLE);
+            if (identifier.NestedIDs.Any())
+            {
+                identifier.NestedIDs[identifier.NestedIDs.Count - 1] = userCreatableId;
+                return ((VariableDeclarationSimple) identifier.NestedIDs[identifier.NestedIDs.Count - 1].decl)
+                    .VariableType.VariableType_;
+            }
+            identifier.RootID = userCreatableId;
+            return ((VariableDeclarationSimple)identifier.RootID.decl).VariableType.VariableType_;
             //if( identifier.NestedIDs.Any() )
             //{  // identifier for struct's value
 

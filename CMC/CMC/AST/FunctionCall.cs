@@ -2,7 +2,7 @@
 {
     public class FunctionCall : AST
     {
-        public UserCreatableID FunctionName { get; }
+        public UserCreatableID FunctionName { get; set; }
         public ArgumentList ArgumentList { get; }
 
         public FunctionCall(UserCreatableID functionName, ArgumentList argumentList)
