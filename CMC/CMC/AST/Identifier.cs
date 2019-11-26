@@ -2,9 +2,7 @@
 
 namespace CMC.AST
 {
-    public abstract class IDBase : AST { }
-
-    public class Identifier : IDBase
+    public class Identifier : AST
     {
         public UserCreatableID RootID { get; set; }
         public List<UserCreatableID> NestedIDs { get; }

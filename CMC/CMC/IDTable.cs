@@ -43,11 +43,12 @@ namespace CMC
             {
                 throw new Exception("ID already defined for current scope level");
             }
-            //checks for "start" function
-            if (type == DeclarationType.FUNCTION && ID.Spelling == "start")
-            {
-                ID.decl = subTreePointer;
 
+            ID.decl = subTreePointer;
+
+            //checks for "start" function
+            if( type == DeclarationType.FUNCTION && ID.Spelling == "start")
+            {
                 var funcDec = (DeclarationFunctionDeclaration) subTreePointer;
 
                 if (funcDec.FunctionDeclaration.ReturnType.ValueType == VariableType.ValueTypeEnum.INTY &&
@@ -98,8 +99,10 @@ namespace CMC
             }
 
             var first = (UserCreatableID) Lookup(ID.RootID, type);
-            var second = (DeclarationStruct)first.decl;
-            var @struct = second.Struct;
+            var second = (VariableDeclarationStructVariableDeclaration)first.decl;
+            var third = Lookup( second.StructVariableDeclaration.StructName, DeclarationType.STRUCT );
+
+            var @struct = ((DeclarationStruct)(third.decl)).Struct;
 
             var loopingStruct = @struct;
             for (int i = 0; i < ID.NestedIDs.Count; i++)

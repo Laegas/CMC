@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CMC
 {
-    public class Checker : IASTVisitor
+    public class SemanticCheckerAndDecorater : IASTVisitor
     {
         private IDTable idTable = new IDTable();
 
@@ -284,9 +284,10 @@ namespace CMC
         public object VisitProgram(AST.Program program, object o)
         {
             program.Declarations.ForEach(item => item.Visit(this, null));
+
             if (idTable.HasStartFunction == false)
             {
-                throw new Exception("PRogram must have a start function");
+                throw new Exception("Program must have a start function");
             }
             return null;
         }
@@ -395,9 +396,50 @@ namespace CMC
         {
             var literalType = (VariableType.ValueTypeEnum)statementAssignment.Expression.Visit(this);
 
-            var declaration = idTable.Lookup(statementAssignment.Identifier, IDTable.DeclarationType.VARIABLE).decl;
 
-            if (declaration is VariableDeclarationSimple declarationSimple)
+            var lookedupID = idTable.Lookup( statementAssignment.Identifier.RootID, IDTable.DeclarationType.VARIABLE );
+            statementAssignment.Identifier.RootID = lookedupID;
+            var first = (VariableDeclarationStructVariableDeclaration)statementAssignment.Identifier.RootID.decl;
+
+            int nestedIdPointer = 0;
+            VariableDeclarationStructVariableDeclaration current = first;
+            string currentIdSpelling = statementAssignment.Identifier.NestedIDs[0].Spelling;
+            bool stillRunning = true;
+            while( stillRunning)
+            {
+                for(int i = 0; i < current.StructVariableDeclaration.data.Count; i++ )
+                {
+                    if(current.StructVariableDeclaration.data[i].Spelling == currentIdSpelling )
+                    {
+                        if(nestedIdPointer +1 == statementAssignment.Identifier.NestedIDs.Count )
+                        {
+                            // this is the final one
+                            stillRunning = false;
+                            break;
+                        }
+                        else
+                        {
+                            //update current
+                            nestedIdPointer++;
+                            current = statementAssignment
+                           currentIdSpelling
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if( statementAssignment.Identifier.NestedIDs.Any() )
+            {
+                var structDecl = (DeclarationStruct)lookedupID.decl;
+                structDecl.Struct.VariableDeclarationList.
+                statementAssignment.Identifier.NestedIDs[ statementAssignment.Identifier.NestedIDs.Count - 1 ] = lookedupID;
+            }
+            
+
+            Declaration declaration = lookedupID.decl;
+
+            if( declaration is VariableDeclarationSimple declarationSimple)
             {
                 if (literalType != declarationSimple.VariableType.VariableType_)
                     throw new Exception("Type is not as expected; Actual: " + literalType + "; Expected: " + declarationSimple.VariableType.VariableType_);
@@ -423,6 +465,27 @@ namespace CMC
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
+            var first = idTable.Lookup( structVariableDeclaration.StructName, IDTable.DeclarationType.STRUCT );
+            var second = (DeclarationStruct)first.decl;
+
+            foreach(var item in second.Struct.VariableDeclarationList.VariableDeclarations )
+            {
+                if( item is VariableDeclarationSimple )
+                {
+                    structVariableDeclaration.data.Add( item.Name );
+                }
+                else if( item is VariableDeclarationStructVariableDeclaration _str)
+                {
+                    idTable.EnterNestedScopeLevel(); // hack
+                    _str.Visit(this);
+                    var id = idTable.Lookup( _str.Name, IDTable.DeclarationType.VARIABLE );
+                    idTable.ExitNestedScopeLevel();
+
+                    structVariableDeclaration.data.Add( id );
+                }
+                
+            }
+
             idTable.Add(structVariableDeclaration.VariableName, new VariableDeclarationStructVariableDeclaration(structVariableDeclaration), IDTable.DeclarationType.VARIABLE);
             return null;
         }
@@ -461,56 +524,6 @@ namespace CMC
             }
             identifier.RootID = userCreatableId;
             return ((VariableDeclarationSimple)identifier.RootID.decl).VariableType.VariableType_;
-            //if( identifier.NestedIDs.Any() )
-            //{  // identifier for struct's value
-
-            //    // lookup type by struct
-            //    var lookedUp = (Struct)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.STRUCT );
-
-
-            //    if( identifier.NestedIDs.Count == 1 )
-            //    { // pointing to inty / booly
-            //        var where = lookedUp.VariableDeclarationList.VariableDeclarations.Where( dec => ( (VariableDeclarationSimple)dec ).VariableName.Spelling == identifier.NestedIDs[ 0 ].Spelling );
-
-            //        if( where.Count() != 1 )
-            //        {
-            //            throw new Exception( "hould not happen" );
-            //        }
-            //        else
-            //        {
-
-            //            return where.First() // variable type
-            //        }
-
-            //        //hello.otherStruct.hello1
-
-            //        //    cook Struct1 hello;
-            //        //    cook Struct2 other;
-            //        //hello.otherStruct = other;
-            //        //kebab Struct1[
-            //        //        Struct2 otherStruct;
-            //        //        ]
-            //        //kebab Struct2[
-            //        //        booly ThisIsBooly;
-            //        //        ]
-
-            //    }
-            //    else
-            //    { // pointing to another struct
-
-            //        var rootID = identifier.NestedIDs[ 0 ];
-            //        identifier.NestedIDs.RemoveAt( 0 );
-            //        var iden = new Identifier( rootID, identifier.NestedIDs );
-            //        return iden.Visit( this, null );
-            //    }
-            //}
-            //else
-            //{
-            //    var lookedUp = (VariableDeclarationSimple)idTable.Lookup( identifier.RootID, IDTable.DeclarationType.VARIABLE );
-
-            //    return lookedUp.VariableType;
-            //}
-            //throw new NotImplementedException();
         }
     }
 }

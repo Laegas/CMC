@@ -13,6 +13,12 @@ namespace CMC
             var parser = new Parser(sourceFile);
             var program = parser.ParseProgram();
             var output = JsonConvert.SerializeObject(program, Formatting.Indented);
+
+            var checker = new SemanticCheckerAndDecorater();
+
+            program.Visit( checker ); // semantic checker and tree decorater
+
+
             //var scanner = new Scanner(sourceFile);
             //while( true )
             //{
