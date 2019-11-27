@@ -8,11 +8,12 @@ namespace CMC
     public class IDTable
     {
         private List<(UserCreatableID structName, Struct @struct)> definedStructs;
-        private List<(int scopeLevel, UserCreatableID ID, DeclarationType type)> enviornment;
+        private List<(int scopeLevel, UserCreatableID ID, Declaration declaration, DeclarationType type)> enviornment;
         private List<bool> isLoopScopeList = new List<bool>();
         private int _currentScopeLevel;
         private VariableType.ValueTypeEnum? CurrentExpectedReturnType;
         public bool HasStartFunction { get; private set; }
+
         public VariableType.ValueTypeEnum ExpectedReturnType
         {
             get
@@ -28,13 +29,19 @@ namespace CMC
             }
         }
 
-        public enum DeclarationType { STRUCT, FUNCTION, VARIABLE }
+        public enum DeclarationType
+        {
+            STRUCT,
+            FUNCTION,
+            VARIABLE
+        }
+
         public IDTable()
         {
             HasStartFunction = false;
             _currentScopeLevel = 0;
             CurrentExpectedReturnType = null;
-            enviornment = new List<(int scopeLevel, UserCreatableID ID, DeclarationType type)>();
+            enviornment = new List<(int scopeLevel, UserCreatableID ID, Declaration declaration, DeclarationType type)>();
         }
 
         public void Add(UserCreatableID ID, Declaration subTreePointer, DeclarationType type)
@@ -44,10 +51,8 @@ namespace CMC
                 throw new Exception("ID already defined for current scope level");
             }
 
-            ID.decl = subTreePointer;
-
             //checks for "start" function
-            if( type == DeclarationType.FUNCTION && ID.Spelling == "start")
+            if (type == DeclarationType.FUNCTION && ID.Spelling == "start")
             {
                 var funcDec = (DeclarationFunctionDeclaration) subTreePointer;
 
@@ -61,7 +66,8 @@ namespace CMC
                     throw new Exception("start function must take nothing and giveback inty");
                 }
             }
-            enviornment.Add((_currentScopeLevel, ID, type));
+
+            enviornment.Add((_currentScopeLevel, ID, subTreePointer, type));
         }
 
         public bool IsInLoopScope()
@@ -69,7 +75,7 @@ namespace CMC
             return isLoopScopeList.Any(x => x == true);
         }
 
-        public UserCreatableID Lookup(UserCreatableID ID, DeclarationType type)
+        public Declaration Lookup(UserCreatableID ID, DeclarationType type)
         {
             var lst = enviornment.FindAll(item => item.ID.Spelling == ID.Spelling && item.type == type);
 
@@ -81,7 +87,7 @@ namespace CMC
             {
                 var max = lst.Max(item => item.scopeLevel);
                 var result = lst.Find(item => item.scopeLevel == max);
-                return result.ID;
+                return result.declaration;
             }
         }
 
@@ -91,70 +97,42 @@ namespace CMC
         /// <param name="ID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public UserCreatableID Lookup(Identifier ID, DeclarationType type)
+        public VariableType Lookup(Identifier ID)
         {
-            if (false == ID.NestedIDs.Any())
+            VariableDeclaration variableDeclaration = ((DeclarationVariableDeclaration) Lookup(ID.RootID, DeclarationType.VARIABLE)).VariableDeclaration;
+
+            for (var a = 0; a < ID.NestedIDs.Count; a++)
             {
-                return Lookup(ID.RootID, type); 
+                UserCreatableID structName = ((VariableDeclarationStructVariableDeclaration) variableDeclaration).StructVariableDeclaration.StructName;
+                Struct @struct = ((DeclarationStruct) Lookup(structName, DeclarationType.STRUCT)).Struct;
+                VariableDeclaration variableDeclarationInsideStruct = @struct.VariableDeclarationList.VariableDeclarations.Find(x => x.Name.Spelling == ID.NestedIDs[a].Spelling);
+                
+                string fullCurrentName = ID.GetFullName(a + 1);
+                if (variableDeclarationInsideStruct == null)
+                {
+                    throw new Exception($"No matching declaration found for {fullCurrentName} in struct {structName}");
+                }
+
+                if (a < ID.NestedIDs.Count - 1 && variableDeclarationInsideStruct is VariableDeclarationSimple)
+                {
+                    throw new Exception($"Expected nested struct for {fullCurrentName}; but it was declared as simple variable type in struct '{structName}'");
+                }
+
+                if (a == ID.NestedIDs.Count - 1 && variableDeclarationInsideStruct is VariableDeclarationStructVariableDeclaration)
+                {
+                    throw new Exception($"Expected simple variable type for {fullCurrentName}; but it was declared as struct in struct '{structName}'");
+                }
+
+                variableDeclaration = variableDeclarationInsideStruct;
             }
-
-            var first = (UserCreatableID) Lookup(ID.RootID, type);
-            var second = (VariableDeclarationStructVariableDeclaration)first.decl;
-            var third = Lookup( second.StructVariableDeclaration.StructName, DeclarationType.STRUCT );
-
-            var @struct = ((DeclarationStruct)(third.decl)).Struct;
-
-            var loopingStruct = @struct;
-            for (int i = 0; i < ID.NestedIDs.Count; i++)
-            {
-                var bla = loopingStruct.VariableDeclarationList.VariableDeclarations;
-
-                var searchedList = bla.Where(item =>
-                {
-                    var name = "";
-                    switch (item)
-                    {
-                        case VariableDeclarationSimple _simple:
-                            name = _simple.VariableName.Spelling;
-                            break;
-                        case VariableDeclarationStructVariableDeclaration _structVar:
-                            name = _structVar.StructVariableDeclaration.VariableName.Spelling;
-                            break;
-                    }
-                    return (name == ID.NestedIDs[i].Spelling);
-                }
-                );
-
-                if (searchedList.Count() != 1)
-                {
-                    throw new Exception("ID not defined");
-                }
-
-                if ((i + 1) == ID.NestedIDs.Count)
-                {
-
-                    var simple = searchedList.First();
-                    if (simple is VariableDeclarationSimple _simple)
-                    {
-                        return ID.NestedIDs[i];
-                    }
-                    else
-                    {
-                        throw new Exception("Identifier did not evaluate to a variable with type inty or booly");
-                    }
-                }
-                var strucDeclare = (VariableDeclarationStructVariableDeclaration)searchedList.First();
-                var one = Lookup(strucDeclare.StructVariableDeclaration.StructName, DeclarationType.STRUCT);
-                var two = (DeclarationStruct) one.decl;
-                loopingStruct = two.Struct;
-            }
-
-            throw new Exception("Something went wrong in the checker");
+            
+            return ((VariableDeclarationSimple) variableDeclaration).VariableType;
         }
+
 
         public void EnterNestedScopeLevel(VariableType.ValueTypeEnum? expectedReturnType = null, bool isLoopScope = false)
         {
-            if (_currentScopeLevel == 0 )
+            if (_currentScopeLevel == 0)
             {
                 if (expectedReturnType.HasValue)
                 {
@@ -172,6 +150,7 @@ namespace CMC
                     throw new Exception("The expected return type can only be set when entering function definition");
                 }
             }
+
             _currentScopeLevel++;
             isLoopScopeList.Add(isLoopScope);
         }
@@ -183,6 +162,7 @@ namespace CMC
             {
                 CurrentExpectedReturnType = null;
             }
+
             isLoopScopeList.RemoveAt(isLoopScopeList.Count - 1);
             enviornment.RemoveAll(item => item.scopeLevel > _currentScopeLevel);
         }

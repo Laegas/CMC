@@ -22,10 +22,11 @@ namespace CMC
 
             for (int i = 0; i < argumentList.Arguments.Count; i++)
             {
-                var typeOfValueReturnedByExpression = (VariableType)argumentList.Arguments[i].Visit(this, null); //TODO WHAT SHOULD WE DO WITH THE RETURNM VALUE
+                var typeOfValueReturnedByExpression = (VariableType) argumentList.Arguments[i].Visit(this);
 
                 if (typeOfValueReturnedByExpression.VariableType_ == parameterList.Parameters[i].ParameterType.VariableType_)
-                {// bind to idTable
+                {
+                    // bind to idTable
                     var decl = new VariableDeclarationSimple(parameterList.Parameters[i].ParameterType,
                         parameterList.Parameters[i].ParameterName, argumentList.Arguments[i]);
                     idTable.Add(parameterList.Parameters[i].ParameterName, decl, IDTable.DeclarationType.VARIABLE);
@@ -42,28 +43,26 @@ namespace CMC
         public object VisitDeclarationVariableDeclaration(DeclarationVariableDeclaration declarationVariableDeclaration,
             object o)
         {
-            declarationVariableDeclaration.VariableDeclaration.Visit(this, null);
+            declarationVariableDeclaration.VariableDeclaration.Visit(this);
             return null;
         }
 
         public object VisitDeclarationFunctionDeclaration(DeclarationFunctionDeclaration declarationFunctionDeclaration,
             object o)
         {
-            declarationFunctionDeclaration.FunctionDeclaration.Visit(this, null);
+            declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
             return null;
         }
 
         public object VisitDeclarationStruct(DeclarationStruct declarationStruct, object o)
         {
-            declarationStruct.Struct.Visit(this, null);
+            declarationStruct.Struct.Visit(this);
             return null;
         }
 
         public object VisitVariableDeclarationSimple(VariableDeclarationSimple variableDeclarationSimple, object o)
         {
-            variableDeclarationSimple.VariableName.decl = new DeclarationVariableDeclaration(variableDeclarationSimple);
-            idTable.Add(variableDeclarationSimple.VariableName, variableDeclarationSimple,
-                IDTable.DeclarationType.VARIABLE);
+            idTable.Add(variableDeclarationSimple.VariableName, variableDeclarationSimple, IDTable.DeclarationType.VARIABLE);
 
             if (variableDeclarationSimple.Expression == null)
             {
@@ -71,7 +70,7 @@ namespace CMC
             }
             else
             {
-                var t1 = (VariableType.ValueTypeEnum)variableDeclarationSimple.Expression.Visit(this);
+                var t1 = (VariableType.ValueTypeEnum) variableDeclarationSimple.Expression.Visit(this);
                 var t2 = variableDeclarationSimple.VariableType.VariableType_;
 
                 if (t1 != t2)
@@ -81,27 +80,25 @@ namespace CMC
 
                 return null;
             }
-
         }
 
-        public object VisitVariableDeclarationStructVariableDeclaration(
-            VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o)
+        public object VisitVariableDeclarationStructVariableDeclaration(VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o)
         {
-            variableDeclarationStructVariableDeclaration.StructVariableDeclaration.Visit(this, null);
+            variableDeclarationStructVariableDeclaration.StructVariableDeclaration.Visit(this);
             return null;
         }
 
         public object VisitVariableDeclarationList(VariableDeclarationList variableDeclarationList, object o)
         {
-            variableDeclarationList.VariableDeclarations.ForEach(item =>
-           {
-               var count = variableDeclarationList.VariableDeclarations.Where(i => i.Name == item.Name).Count();
-               if (count != 1)
-               {
-                   throw new Exception("Duplicate name in struct definition");
-               }
-               item.Visit(this, null);
-           });
+            variableDeclarationList.VariableDeclarations.ForEach(item => {
+                var count = variableDeclarationList.VariableDeclarations.Count(i => i.Name == item.Name);
+                if (count != 1)
+                {
+                    throw new Exception("Duplicate name in struct definition");
+                }
+
+                item.Visit(this);
+            });
             return null;
         }
 
@@ -109,7 +106,7 @@ namespace CMC
         {
             idTable.Add(functionDeclaration.FunctionName, new DeclarationFunctionDeclaration(functionDeclaration), IDTable.DeclarationType.FUNCTION);
 
-            idTable.EnterNestedScopeLevel(expectedReturnType: functionDeclaration.ReturnType.ValueType);
+            idTable.EnterNestedScopeLevel(functionDeclaration.ReturnType.ValueType);
 
             functionDeclaration.ParameterList.Visit(this);
 
@@ -122,40 +119,40 @@ namespace CMC
 
         public object VisitExpression1(Expression1 expression1, object o)
         {
-            if (expression1.Operator1 != null)
-            {
-                var t1 = (VariableType.ValueTypeEnum)expression1.Expression2.Visit(this);
-                var t2 = (VariableType.ValueTypeEnum)expression1.Expression1_.Visit(this);
-
-                if (t1 != t2)
-                {
-                    throw new Exception("Value type for operands in 'is' operator not the same");
-                }
-                if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
-                {
-                    throw new Exception("<Nothing> not a valid operand for 'is' operator");
-                }
-                return VariableType.ValueTypeEnum.BOOLY;
-            }
-            else
+            if (expression1.Operator1 == null)
             {
                 return expression1.Expression2.Visit(this);
             }
+            
+            var t1 = (VariableType.ValueTypeEnum) expression1.Expression2.Visit(this);
+            var t2 = (VariableType.ValueTypeEnum) expression1.Expression1_.Visit(this);
+
+            if (t1 != t2)
+            {
+                throw new Exception("Value type for operands in 'is' operator not the same");
+            }
+
+            if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
+            {
+                throw new Exception("<Nothing> not a valid operand for 'is' operator");
+            }
+
+            return VariableType.ValueTypeEnum.BOOLY;
+
         }
 
         public object VisitExpression2(Expression2 expression2, object o)
         {
-
             if (expression2.Operator2 == null)
             {
                 return expression2.Expression3.Visit(this);
             }
 
 
-            var lv2IntyOpr = new List<string>() { "+", "-" };
+            var lv2IntyOpr = new List<string>() {"+", "-"};
 
-            var t1 = (VariableType.ValueTypeEnum)expression2.Expression1.Visit(this);
-            var t2 = (VariableType.ValueTypeEnum)expression2.Expression3.Visit(this);
+            var t1 = (VariableType.ValueTypeEnum) expression2.Expression1.Visit(this);
+            var t2 = (VariableType.ValueTypeEnum) expression2.Expression3.Visit(this);
 
             if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
             {
@@ -191,7 +188,6 @@ namespace CMC
             }
 
             throw new Exception("Something bad happened, code: 98465+4865");
-
         }
 
         public object VisitExpression3(Expression3 expression3, object o)
@@ -202,10 +198,10 @@ namespace CMC
             }
 
 
-            var lv3IntyOpr = new List<string>() { "*", "/" };
+            var lv3IntyOpr = new List<string>() {"*", "/"};
 
-            var t1 = (VariableType.ValueTypeEnum)expression3.Expression1.Visit(this);
-            var t2 = (VariableType.ValueTypeEnum)expression3.Primary.Visit(this);
+            var t1 = (VariableType.ValueTypeEnum) expression3.Expression1.Visit(this);
+            var t2 = (VariableType.ValueTypeEnum) expression3.Primary.Visit(this);
 
             if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
             {
@@ -247,9 +243,9 @@ namespace CMC
         {
             foreach (var item in parameterList.Parameters)
             {
-                item.Visit(this, null);
+                item.Visit(this);
             }
-            //this is all it needs to be, we think
+
             return null;
         }
 
@@ -257,7 +253,6 @@ namespace CMC
         public object VisitPrimaryIdentifier(PrimaryIdentifier primaryIdentifier, object o)
         {
             return primaryIdentifier.Identifier.Visit(this);
-
         }
 
         public object VisitPrimaryBoolyLiteral(PrimaryBoolyLiteral primaryBoolyLiteral, object o)
@@ -272,7 +267,6 @@ namespace CMC
 
         public object VisitPrimaryFunctionCall(PrimaryFunctionCall primaryFunctionCall, object o)
         {
-            
             return primaryFunctionCall.FunctionCall.Visit(this);
         }
 
@@ -289,26 +283,25 @@ namespace CMC
             {
                 throw new Exception("Program must have a start function");
             }
+
             return null;
         }
 
         public object VisitReturnVariableType(ReturnTypeVariableType returnTypeVariableType, object o)
         {
-            //WE DONT THINK THIS IS USED
-            return null;
+            throw new NotImplementedException("Should never be called");
         }
 
         public object VisitReturnTypeNothing(ReturnTypeNothing returnTypeNothing, object o)
         {
-            //WE DONT THINK THIS IS USED
-            return null;
+            throw new NotImplementedException("Should never be called");
         }
 
         public object VisitStatementIfStatement(StatementIfStatement statementIfStatement, object o)
         {
             idTable.EnterNestedScopeLevel();
 
-            var variableType = (VariableType.ValueTypeEnum)statementIfStatement.Condition.Visit(this);
+            var variableType = (VariableType.ValueTypeEnum) statementIfStatement.Condition.Visit(this);
             if (variableType != VariableType.ValueTypeEnum.BOOLY)
             {
                 throw new Exception("If statement condition must evaluate to booly value");
@@ -325,7 +318,7 @@ namespace CMC
         {
             idTable.EnterNestedScopeLevel(isLoopScope: true);
 
-            var variableType = (VariableType.ValueTypeEnum)statementLoopStatement.Condition.Visit(this);
+            var variableType = (VariableType.ValueTypeEnum) statementLoopStatement.Condition.Visit(this);
             if (variableType != VariableType.ValueTypeEnum.BOOLY)
             {
                 throw new Exception("Loop statement condition must evaluate to a booly value");
@@ -350,7 +343,7 @@ namespace CMC
 
         public object VisitStatementGiveBack(StatementGiveBack statementGiveBack, object o)
         {
-            var expressionVariableType = (VariableType)statementGiveBack.Expression.Visit(this);
+            var expressionVariableType = (VariableType) statementGiveBack.Expression.Visit(this);
 
             if (expressionVariableType.VariableType_ != idTable.ExpectedReturnType)
             {
@@ -358,12 +351,6 @@ namespace CMC
             }
 
             return null;
-        }
-
-        public void Hello()
-        {
-
-
         }
 
         public object VisitStatements(Statements statements, object o)
@@ -387,73 +374,27 @@ namespace CMC
         public object VisitStatementVariableDeclaration(StatementVariableDeclaration statementVariableDeclaration,
             object o)
         {
-            statementVariableDeclaration.VariableDeclaration.Visit(this, null);
+            statementVariableDeclaration.VariableDeclaration.Visit(this);
             return null;
         }
 
         //identifier already in the table
         public object VisitStatementAssignment(StatementAssignment statementAssignment, object o)
         {
-            var literalType = (VariableType.ValueTypeEnum)statementAssignment.Expression.Visit(this);
+            VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this);
+            VariableType.ValueTypeEnum variableType = (VariableType.ValueTypeEnum) statementAssignment.Identifier.Visit(this);
 
-
-            var lookedupID = idTable.Lookup( statementAssignment.Identifier.RootID, IDTable.DeclarationType.VARIABLE );
-            statementAssignment.Identifier.RootID = lookedupID;
-            var first = (VariableDeclarationStructVariableDeclaration)statementAssignment.Identifier.RootID.decl;
-
-            int nestedIdPointer = 0;
-            VariableDeclarationStructVariableDeclaration current = first;
-            string currentIdSpelling = statementAssignment.Identifier.NestedIDs[0].Spelling;
-            bool stillRunning = true;
-            while( stillRunning)
+            if (variableType != expressionType)
             {
-                for(int i = 0; i < current.StructVariableDeclaration.data.Count; i++ )
-                {
-                    if(current.StructVariableDeclaration.data[i].Spelling == currentIdSpelling )
-                    {
-                        if(nestedIdPointer +1 == statementAssignment.Identifier.NestedIDs.Count )
-                        {
-                            // this is the final one
-                            stillRunning = false;
-                            break;
-                        }
-                        else
-                        {
-                            //update current
-                            nestedIdPointer++;
-                            current = statementAssignment
-                           currentIdSpelling
-                                break;
-                        }
-                    }
-                }
+                throw new Exception("Invalid expression type for " + statementAssignment.Identifier.GetFullName());
             }
 
-            if( statementAssignment.Identifier.NestedIDs.Any() )
-            {
-                var structDecl = (DeclarationStruct)lookedupID.decl;
-                structDecl.Struct.VariableDeclarationList.
-                statementAssignment.Identifier.NestedIDs[ statementAssignment.Identifier.NestedIDs.Count - 1 ] = lookedupID;
-            }
-            
-
-            Declaration declaration = lookedupID.decl;
-
-            if( declaration is VariableDeclarationSimple declarationSimple)
-            {
-                if (literalType != declarationSimple.VariableType.VariableType_)
-                    throw new Exception("Type is not as expected; Actual: " + literalType + "; Expected: " + declarationSimple.VariableType.VariableType_);
-                return null;
-            }
-            else
-            {
-                throw new Exception("Something bad happened: 2345432343ffyhvgffrgbhnj");
-            }
+            return null;
         }
 
         public object VisitStatementFunctionCall(StatementFunctionCall statementFunctionCall, object o)
         {
-            statementFunctionCall.FunctionCall.Visit(this, null);
+            statementFunctionCall.FunctionCall.Visit(this);
             return null;
         }
 
@@ -465,27 +406,6 @@ namespace CMC
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
-            var first = idTable.Lookup( structVariableDeclaration.StructName, IDTable.DeclarationType.STRUCT );
-            var second = (DeclarationStruct)first.decl;
-
-            foreach(var item in second.Struct.VariableDeclarationList.VariableDeclarations )
-            {
-                if( item is VariableDeclarationSimple )
-                {
-                    structVariableDeclaration.data.Add( item.Name );
-                }
-                else if( item is VariableDeclarationStructVariableDeclaration _str)
-                {
-                    idTable.EnterNestedScopeLevel(); // hack
-                    _str.Visit(this);
-                    var id = idTable.Lookup( _str.Name, IDTable.DeclarationType.VARIABLE );
-                    idTable.ExitNestedScopeLevel();
-
-                    structVariableDeclaration.data.Add( id );
-                }
-                
-            }
-
             idTable.Add(structVariableDeclaration.VariableName, new VariableDeclarationStructVariableDeclaration(structVariableDeclaration), IDTable.DeclarationType.VARIABLE);
             return null;
         }
@@ -499,11 +419,9 @@ namespace CMC
 
         public object VisitFunctionCall(FunctionCall functionCall, object o)
         {
-            functionCall.FunctionName = idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
-            FunctionDeclaration dec = ((DeclarationFunctionDeclaration)functionCall.FunctionName.decl).FunctionDeclaration;
-
-            functionCall.ArgumentList.Visit(this, dec.ParameterList);
-
+            FunctionDeclaration functionDeclaration = ((DeclarationFunctionDeclaration) idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION)).FunctionDeclaration;
+            functionCall.FunctionDeclaration = functionDeclaration;
+            functionCall.ArgumentList.Visit(this, functionDeclaration.ParameterList);
             return null;
         }
 
@@ -515,15 +433,7 @@ namespace CMC
         /// <returns></returns>
         public object VisitIdentifier(Identifier identifier, object o)
         {
-            var userCreatableId = idTable.Lookup(identifier, IDTable.DeclarationType.VARIABLE);
-            if (identifier.NestedIDs.Any())
-            {
-                identifier.NestedIDs[identifier.NestedIDs.Count - 1] = userCreatableId;
-                return ((VariableDeclarationSimple) identifier.NestedIDs[identifier.NestedIDs.Count - 1].decl)
-                    .VariableType.VariableType_;
-            }
-            identifier.RootID = userCreatableId;
-            return ((VariableDeclarationSimple)identifier.RootID.decl).VariableType.VariableType_;
+            return idTable.Lookup(identifier);
         }
     }
 }

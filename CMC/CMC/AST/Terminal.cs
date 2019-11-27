@@ -56,8 +56,6 @@ namespace CMC.AST
 
     public class UserCreatableID : Terminal
     {
-        public Declaration decl { get; set; } // decorated AST
-
         public UserCreatableID(Token token) : base(token.Spelling)
         {
             CheckTokenType(Token.TokenType.USER_CREATABLE_ID, token.TheTokenType);
