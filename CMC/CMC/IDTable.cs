@@ -97,9 +97,9 @@ namespace CMC
         /// <param name="ID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public VariableType Lookup(Identifier ID)
+        public VariableType.ValueTypeEnum Lookup(Identifier ID)
         {
-            VariableDeclaration variableDeclaration = ((DeclarationVariableDeclaration) Lookup(ID.RootID, DeclarationType.VARIABLE)).VariableDeclaration;
+            VariableDeclaration variableDeclaration = ((VariableDeclaration) Lookup(ID.RootID, DeclarationType.VARIABLE));
 
             for (var a = 0; a < ID.NestedIDs.Count; a++)
             {
@@ -126,7 +126,7 @@ namespace CMC
                 variableDeclaration = variableDeclarationInsideStruct;
             }
             
-            return ((VariableDeclarationSimple) variableDeclaration).VariableType;
+            return ((VariableDeclarationSimple) variableDeclaration).VariableType.VariableType_;
         }
 
 

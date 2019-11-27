@@ -343,9 +343,18 @@ namespace CMC
 
         public object VisitStatementGiveBack(StatementGiveBack statementGiveBack, object o)
         {
-            var expressionVariableType = (VariableType) statementGiveBack.Expression.Visit(this);
+            if (idTable.ExpectedReturnType == VariableType.ValueTypeEnum.NOTHING)
+            {
+                return null;
+            }
 
-            if (expressionVariableType.VariableType_ != idTable.ExpectedReturnType)
+            if (statementGiveBack.Expression == null)
+            {
+                throw new Exception("Giveback statement must return value of type: " + idTable.ExpectedReturnType);
+            }
+            
+            var expressionVariableType = (VariableType.ValueTypeEnum) statementGiveBack.Expression.Visit(this);
+            if (expressionVariableType != idTable.ExpectedReturnType)
             {
                 throw new Exception("Give back must return value of expected type");
             }
