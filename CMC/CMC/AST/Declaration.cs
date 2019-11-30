@@ -4,6 +4,7 @@ namespace CMC.AST
 {
     public abstract class Declaration : AST
     {
+        public int addr;
     }
 
     public class DeclarationVariableDeclaration : Declaration
