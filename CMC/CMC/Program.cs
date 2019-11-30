@@ -7,12 +7,12 @@ namespace CMC
     {
         private static void Main(string[] args)
         {
-
+            /*
             Encoder.Testing();
 
             return;
-
-            var sourceFile = new SourceFile(@"testProgramForScanner.pudekcuf");
+            */
+            var sourceFile = new SourceFile(@"testPudekcuf/HelloWorld.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);
@@ -22,8 +22,9 @@ namespace CMC
             var checker = new SemanticCheckerAndDecorater();
 
             program.Visit( checker ); // semantic checker and tree decorater
-
-
+            var encoder = new Encoder();
+            encoder.Encode(program);
+            encoder.SaveTargetProgram(AppContext.BaseDirectory + Encoder.FILE_NAME);
             //var scanner = new Scanner(sourceFile);
             //while( true )
             //{

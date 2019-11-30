@@ -22,9 +22,9 @@ namespace CMC
 
             for (int i = 0; i < argumentList.Arguments.Count; i++)
             {
-                var typeOfValueReturnedByExpression = (VariableType) argumentList.Arguments[i].Visit(this);
+                var typeOfValueReturnedByExpression = (VariableType.ValueTypeEnum) argumentList.Arguments[i].Visit(this);
 
-                if (typeOfValueReturnedByExpression.VariableType_ == parameterList.Parameters[i].ParameterType.VariableType_)
+                if (typeOfValueReturnedByExpression == parameterList.Parameters[i].ParameterType.VariableType_)
                 {
                     // bind to idTable
                     var decl = new VariableDeclarationSimple(parameterList.Parameters[i].ParameterType,
@@ -50,12 +50,16 @@ namespace CMC
         public object VisitDeclarationFunctionDeclaration(DeclarationFunctionDeclaration declarationFunctionDeclaration,
             object o)
         {
+            idTable.Add(declarationFunctionDeclaration.FunctionDeclaration.FunctionName, declarationFunctionDeclaration, IDTable.DeclarationType.FUNCTION);
+
             declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
             return null;
         }
 
         public object VisitDeclarationStruct(DeclarationStruct declarationStruct, object o)
         {
+            idTable.Add(declarationStruct.Struct.StructName, declarationStruct, IDTable.DeclarationType.STRUCT);
+
             declarationStruct.Struct.Visit(this);
             return null;
         }
@@ -104,8 +108,6 @@ namespace CMC
 
         public object VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object o)
         {
-            idTable.Add(functionDeclaration.FunctionName, new DeclarationFunctionDeclaration(functionDeclaration), IDTable.DeclarationType.FUNCTION);
-
             idTable.EnterNestedScopeLevel(functionDeclaration.ReturnType.ValueType);
 
             functionDeclaration.ParameterList.Visit(this);
@@ -275,13 +277,38 @@ namespace CMC
             return primaryExpression.Expression.Visit(this);
         }
 
+        private void DeclareSTD()
+        {
+            var parameterList = new ParameterList(new List<Parameter>());
+            parameterList.Parameters.Add(new Parameter(
+                    new VariableType(new Token("inty" /* doesn't matter */, Token.TokenType.VARIABLE_TYPE)),
+                    new UserCreatableID(new Token("blah" /* doesn't matter */, Token.TokenType.USER_CREATABLE_ID))));
+
+            var printFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
+                new UserCreatableID(new Token("print", Token.TokenType.USER_CREATABLE_ID)),
+                parameterList,
+                new ReturnTypeNothing(), 
+                new Statements(new List<Statement>())
+            ));
+
+            Encoder.printFunction = printFunc;
+
+            idTable.Add(printFunc.FunctionDeclaration.FunctionName, printFunc, IDTable.DeclarationType.FUNCTION);
+        }
+
         public object VisitProgram(AST.Program program, object o)
         {
+            DeclareSTD();
+
             program.Declarations.ForEach(item => item.Visit(this, null));
 
-            if (idTable.HasStartFunction == false)
+            if (idTable.StartFunction == null)
             {
                 throw new Exception("Program must have a start function");
+            }
+            else
+            {
+                program.StartDeclaration = idTable.StartFunction;
             }
 
             return null;
@@ -409,7 +436,6 @@ namespace CMC
 
         public object VisitStruct(Struct @struct, object o)
         {
-            idTable.Add(@struct.StructName, new DeclarationStruct(@struct), IDTable.DeclarationType.STRUCT);
             return null;
         }
 
@@ -428,9 +454,8 @@ namespace CMC
 
         public object VisitFunctionCall(FunctionCall functionCall, object o)
         {
-            FunctionDeclaration functionDeclaration = ((DeclarationFunctionDeclaration) idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION)).FunctionDeclaration;
-            functionCall.FunctionDeclaration = functionDeclaration;
-            functionCall.ArgumentList.Visit(this, functionDeclaration.ParameterList);
+            functionCall.FunctionDeclaration = (DeclarationFunctionDeclaration) idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
+            functionCall.ArgumentList.Visit(this, functionCall.FunctionDeclaration.FunctionDeclaration.ParameterList);
             return null;
         }
 

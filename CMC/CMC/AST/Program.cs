@@ -5,7 +5,7 @@ namespace CMC.AST
     public class Program : AST
     {
         public List<Declaration> Declarations { get; }
-
+        public DeclarationFunctionDeclaration StartDeclaration { get; set; }
         public Program(List<Declaration> declarations)
         {
             Declarations = declarations;

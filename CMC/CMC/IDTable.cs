@@ -12,7 +12,7 @@ namespace CMC
         private List<bool> isLoopScopeList = new List<bool>();
         private int _currentScopeLevel;
         private VariableType.ValueTypeEnum? CurrentExpectedReturnType;
-        public bool HasStartFunction { get; private set; }
+        public DeclarationFunctionDeclaration StartFunction { get; private set; }
 
         public VariableType.ValueTypeEnum ExpectedReturnType
         {
@@ -38,7 +38,7 @@ namespace CMC
 
         public IDTable()
         {
-            HasStartFunction = false;
+            StartFunction = null;
             _currentScopeLevel = 0;
             CurrentExpectedReturnType = null;
             enviornment = new List<(int scopeLevel, UserCreatableID ID, Declaration declaration, DeclarationType type)>();
@@ -59,7 +59,7 @@ namespace CMC
                 if (funcDec.FunctionDeclaration.ReturnType.ValueType == VariableType.ValueTypeEnum.INTY &&
                     funcDec.FunctionDeclaration.ParameterList.Parameters.Count == 0)
                 {
-                    HasStartFunction = true;
+                    StartFunction = funcDec;
                 }
                 else
                 {

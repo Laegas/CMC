@@ -10,6 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="testPudekcuf\HelloWorld.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="_testProgramForScanner.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

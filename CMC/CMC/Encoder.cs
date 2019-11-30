@@ -11,7 +11,10 @@ namespace CMC
     {
         private int nextAdr = Machine.CB; // from Jan
         private int currentLevel = 0; // from Jan
-        private static readonly string FILE_NAME = "combiled.TAM";
+        public static readonly string FILE_NAME = "combiled.TAM";
+
+        // Standard environment
+        public static DeclarationFunctionDeclaration printFunction;
 
         private void Emit( int op, int n, int r, int d ) // from Jan
         {
@@ -88,8 +91,6 @@ namespace CMC
             // this workes amazingly!!
 
             encoder.SaveTargetProgram(AppContext.BaseDirectory + FILE_NAME );
-
-
         }
 
 
@@ -101,32 +102,63 @@ namespace CMC
 
         public object VisitDeclarationFunctionDeclaration( DeclarationFunctionDeclaration declarationFunctionDeclaration, object o )
         {
-            throw new NotImplementedException();
+            var savedAddr = nextAdr;
+            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
+            declarationFunctionDeclaration.addr = nextAdr;
+            declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
+            Patch(savedAddr, nextAdr);
+            return null;
         }
 
         public object VisitDeclarationStruct( DeclarationStruct declarationStruct, object o )
         {
-            throw new NotImplementedException();
+            var savedAddr = nextAdr;
+            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
+            declarationStruct.Struct.Visit(this);
+            Patch(savedAddr, nextAdr);
+            return null;
         }
 
         public object VisitDeclarationVariableDeclaration( DeclarationVariableDeclaration declarationVariableDeclaration, object o )
         {
-            throw new NotImplementedException();
+            declarationVariableDeclaration.VariableDeclaration.Visit(this);
+            return null;
         }
 
         public object VisitExpression1( Expression1 expression1, object o )
         {
-            throw new NotImplementedException();
+            if (expression1.Operator1 == null)
+            {
+                return expression1.Expression2.Visit(this);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public object VisitExpression2( Expression2 expression2, object o )
         {
-            throw new NotImplementedException();
+            if (expression2.Operator2 == null)
+            {
+                return expression2.Expression3.Visit(this);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public object VisitExpression3( Expression3 expression3, object o )
         {
-            throw new NotImplementedException();
+            if (expression3.Operator3 == null)
+            {
+                return expression3.Primary.Visit(this);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public object VisitFunctionCall( FunctionCall functionCall, object o )
@@ -142,7 +174,11 @@ namespace CMC
 
         public object VisitFunctionDeclaration( FunctionDeclaration functionDeclaration, object o )
         {
-            throw new NotImplementedException();
+            functionDeclaration.ParameterList.Visit(this);
+            functionDeclaration.Statements.Visit(this);
+
+            Emit(Machine.RETURNop, 0, 0, functionDeclaration.ParameterList.Parameters.Count);
+            return null;
         }
 
         public object VisitIdentifier( Identifier identifier, object o )
@@ -152,12 +188,13 @@ namespace CMC
 
         public object VisitParameter( Parameter visitor, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitParameterList( ParameterList parameterList, object o )
         {
-            throw new NotImplementedException();
+            parameterList.Parameters.ForEach(item => item.Visit(this));
+            return null;
         }
 
         public object VisitPrimaryBoolyLiteral( PrimaryBoolyLiteral primaryBoolyLiteral, object o )
@@ -182,17 +219,30 @@ namespace CMC
 
         public object VisitPrimaryIntyLiteral( PrimaryIntyLiteral primaryIntyLiteral, object o )
         {
-            throw new NotImplementedException();
+            return Convert.ToInt32(primaryIntyLiteral.Value.Spelling);
+        }
+
+        private void DefineSTD()
+        {
+            var savedAddr = nextAdr;
+            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
+            printFunction.addr = nextAdr;
+
+            Emit(Machine.LOADop, 1, Machine.LBr, -1);
+            Emit(Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement);
+            Emit(Machine.RETURNop, 0, 0, 0);
+
+            Patch(savedAddr, nextAdr);
         }
 
         public object VisitProgram( AST.Program program, object o )
         {
-            //define default methods TODO
-
+            DefineSTD();
+            
             program.Declarations.ForEach( item => item.Visit( this, null ) );
 
-
-            //call function start TODO
+            //call start function 
+            Emit(Machine.CALLop, 0, Machine.CBr, program.StartDeclaration.addr);
 
             Emit( Machine.HALTop, 0, 0, 0 );
             return null;
@@ -215,7 +265,9 @@ namespace CMC
 
         public object VisitStatementFunctionCall( StatementFunctionCall statementFunctionCall, object o )
         {
-            throw new NotImplementedException();
+            statementFunctionCall.FunctionCall.Visit(this);
+            // todo POP 0 (returnSize)
+            return null;
         }
 
         public object VisitStatementGiveBack( StatementGiveBack statementGiveBack, object o )
@@ -235,7 +287,8 @@ namespace CMC
 
         public object VisitStatements( Statements statements, object o )
         {
-            throw new NotImplementedException();
+            statements.Statements_.ForEach(item => item.Visit(this));
+            return null;
         }
 
         public object VisitStatementStopTheLoop( StatementStopTheLoop statementStopTheLoop, object o )
@@ -265,7 +318,17 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple( VariableDeclarationSimple variableDeclarationSimple, object o )
         {
-            throw new NotImplementedException();
+            variableDeclarationSimple.addr = nextAdr;
+            if (variableDeclarationSimple.Expression == null)
+            {
+                Emit(Machine.PUSHop, 0, 0, 1);
+            }
+            else
+            {
+                var result = (int)variableDeclarationSimple.Expression.Visit(this);
+                Emit(Machine.LOADIop, 0, 0, result);
+            }
+            return null;
         }
 
         public object VisitVariableDeclarationStructVariableDeclaration( VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o )
