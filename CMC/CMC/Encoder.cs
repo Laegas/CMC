@@ -87,7 +87,7 @@ namespace CMC
 
             // this workes amazingly!!
 
-            encoder.SaveTargetProgram( @"C:\Users\Kenneth\Desktop\comiledTAM\" + FILE_NAME );
+            encoder.SaveTargetProgram(AppContext.BaseDirectory + FILE_NAME );
 
 
         }
