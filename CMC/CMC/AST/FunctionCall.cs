@@ -5,7 +5,7 @@
         public UserCreatableID FunctionName { get; }
         public ArgumentList ArgumentList { get; }
         
-        public FunctionDeclaration FunctionDeclaration { get; set; }
+        public DeclarationFunctionDeclaration FunctionDeclaration { get; set; }
 
         public FunctionCall(UserCreatableID functionName, ArgumentList argumentList)
         {

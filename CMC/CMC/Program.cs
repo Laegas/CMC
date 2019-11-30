@@ -7,6 +7,11 @@ namespace CMC
     {
         private static void Main(string[] args)
         {
+
+            Encoder.Testing();
+
+            return;
+
             var sourceFile = new SourceFile(@"testProgramForScanner.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
