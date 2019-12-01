@@ -1,0 +1,14 @@
+﻿
+inty a = 5;
+
+function start takes nothing givesBack inty [
+	inty b = 7;
+
+	call print with a;
+#	call print with b;
+
+	a = 7;
+
+#	call print with a;
+]
+

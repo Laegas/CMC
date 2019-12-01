@@ -4,7 +4,6 @@ namespace CMC.AST
 {
     public abstract class Declaration : AST
     {
-        public int addr;
     }
 
     public class DeclarationVariableDeclaration : Declaration
@@ -58,8 +57,10 @@ namespace CMC.AST
         public abstract UserCreatableID Name{ get; }
     }
 
-    public class VariableDeclarationSimple : VariableDeclaration
+    public class VariableDeclarationSimple : VariableDeclaration, IAddressable
     {
+        public Address Address { get; set; }
+
         public VariableType VariableType { get; }
         public UserCreatableID VariableName { get; }
         public Expression1 Expression { get; }
@@ -113,8 +114,10 @@ namespace CMC.AST
         }
     }
 
-    public class FunctionDeclaration : AST
+    public class FunctionDeclaration : AST, IAddressable
     {
+        public Address Address { get; set; }
+
         public UserCreatableID FunctionName { get; }
         public ParameterList ParameterList { get; }
         public ReturnType ReturnType { get; }

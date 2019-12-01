@@ -26,6 +26,8 @@ namespace CMC.AST
         public Identifier Identifier { get; }
         public Expression1 Expression { get; }
 
+        public VariableDeclarationSimple IDsDeclaration { get; set; }
+
         public StatementAssignment(Identifier identifier, Expression1 expression)
         {
             Identifier = identifier;

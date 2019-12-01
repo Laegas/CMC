@@ -43,6 +43,7 @@ namespace CMC
         public object VisitDeclarationVariableDeclaration(DeclarationVariableDeclaration declarationVariableDeclaration,
             object o)
         {
+
             declarationVariableDeclaration.VariableDeclaration.Visit(this);
             return null;
         }
@@ -254,7 +255,10 @@ namespace CMC
 
         public object VisitPrimaryIdentifier(PrimaryIdentifier primaryIdentifier, object o)
         {
-            return primaryIdentifier.Identifier.Visit(this);
+            var varDecSimple = (VariableDeclarationSimple)primaryIdentifier.Identifier.Visit(this);
+            primaryIdentifier.IDsDeclaration = varDecSimple;
+
+            return varDecSimple.VariableType.VariableType_;
         }
 
         public object VisitPrimaryBoolyLiteral(PrimaryBoolyLiteral primaryBoolyLiteral, object o)
@@ -418,9 +422,11 @@ namespace CMC
         public object VisitStatementAssignment(StatementAssignment statementAssignment, object o)
         {
             VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this);
-            VariableType.ValueTypeEnum variableType = (VariableType.ValueTypeEnum) statementAssignment.Identifier.Visit(this);
+            var variableDecSimple = (VariableDeclarationSimple) statementAssignment.Identifier.Visit(this);
 
-            if (variableType != expressionType)
+            statementAssignment.IDsDeclaration = variableDecSimple;
+
+            if (variableDecSimple.VariableType.VariableType_ != expressionType)
             {
                 throw new Exception("Invalid expression type for " + statementAssignment.Identifier.GetFullName());
             }

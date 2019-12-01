@@ -1,4 +1,5 @@
-﻿inty a;
+﻿
+inty a;
 
 function start takes nothing givesBack inty [
 	call print with 5;

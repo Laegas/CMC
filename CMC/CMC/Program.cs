@@ -12,7 +12,7 @@ namespace CMC
 
             return;
             */
-            var sourceFile = new SourceFile(@"testPudekcuf/HelloWorld.pudekcuf");
+            var sourceFile = new SourceFile(@"testPudekcuf/PrintVariable.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);

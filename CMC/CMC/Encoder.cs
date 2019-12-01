@@ -10,7 +10,7 @@ namespace CMC
     public class Encoder : IASTVisitor
     {
         private int nextAdr = Machine.CB; // from Jan
-        private int currentLevel = 0; // from Jan
+        private int currentScopeLevel = 0; // from Jan
         public static readonly string FILE_NAME = "combiled.TAM";
 
         // Standard environment
@@ -104,7 +104,7 @@ namespace CMC
         {
             var savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            declarationFunctionDeclaration.addr = nextAdr;
+            declarationFunctionDeclaration.FunctionDeclaration.Address = new Address(currentScopeLevel,nextAdr);
             declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
             Patch(savedAddr, nextAdr);
             return null;
@@ -168,7 +168,7 @@ namespace CMC
                 Emit( Machine.LOADLop, 0, 0, (int)item.Visit( this ) );
             }
 
-            Emit( Machine.CALLop, 0 ,Machine.SBr, functionCall.FunctionDeclaration.addr);
+            Emit( Machine.CALLop, 0 ,Machine.SBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Address_);
             return null;
         }
 
@@ -214,6 +214,7 @@ namespace CMC
 
         public object VisitPrimaryIdentifier( PrimaryIdentifier primaryIdentifier, object o )
         {
+            primaryIdentifier.IDsDeclaration
             throw new NotImplementedException();
         }
 
@@ -226,10 +227,11 @@ namespace CMC
         {
             var savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            printFunction.addr = nextAdr;
+            printFunction.FunctionDeclaration.Address = new Address(currentScopeLevel, nextAdr);
 
             Emit(Machine.LOADop, 1, Machine.LBr, -1);
             Emit(Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement);
+            Emit( Machine.CALLop, 0, Machine.PBr, Machine.puteolDisplacement );
             Emit(Machine.RETURNop, 0, 0, 0);
 
             Patch(savedAddr, nextAdr);
@@ -242,7 +244,7 @@ namespace CMC
             program.Declarations.ForEach( item => item.Visit( this, null ) );
 
             //call start function 
-            Emit(Machine.CALLop, 0, Machine.CBr, program.StartDeclaration.addr);
+            Emit(Machine.CALLop, 0, Machine.CBr, program.StartDeclaration.FunctionDeclaration.Address.Address_);
 
             Emit( Machine.HALTop, 0, 0, 0 );
             return null;
@@ -260,7 +262,19 @@ namespace CMC
 
         public object VisitStatementAssignment( StatementAssignment statementAssignment, object o )
         {
+            //statementAssignment.IDsDeclaration.Address
+            Emit( Machine.LOADLop, 0, 0, (int)statementAssignment.Expression.Visit( this ) ); // pushing value to stack
+            //Emit( Machine.STOREop,1, )
             throw new NotImplementedException();
+
+            //if(statementAssignment.Identifier.NestedIDs.Count == 0 )
+            //{
+            //    statementAssignment.IDsDeclaration.
+            //}
+            //else
+            //{
+            //    throw new NotImplementedException();
+            //}
         }
 
         public object VisitStatementFunctionCall( StatementFunctionCall statementFunctionCall, object o )
@@ -298,7 +312,8 @@ namespace CMC
 
         public object VisitStatementVariableDeclaration( StatementVariableDeclaration statementVariableDeclaration, object o )
         {
-            throw new NotImplementedException();
+            statementVariableDeclaration.VariableDeclaration.Visit( this );
+            return null;
         }
 
         public object VisitStruct( Struct @struct, object o )
@@ -318,7 +333,7 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple( VariableDeclarationSimple variableDeclarationSimple, object o )
         {
-            variableDeclarationSimple.addr = nextAdr;
+            variableDeclarationSimple.Address = new Address(currentScopeLevel, nextAdr);
             if (variableDeclarationSimple.Expression == null)
             {
                 Emit(Machine.PUSHop, 0, 0, 1);

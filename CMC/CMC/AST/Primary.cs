@@ -8,6 +8,8 @@
     {
         public Identifier Identifier { get; }
 
+        public VariableDeclarationSimple IDsDeclaration { get; set; }
+
         public PrimaryIdentifier(Identifier identifier)
         {
             Identifier = identifier;

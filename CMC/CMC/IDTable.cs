@@ -97,7 +97,7 @@ namespace CMC
         /// <param name="ID"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public VariableType.ValueTypeEnum Lookup(Identifier ID)
+        public VariableDeclarationSimple Lookup(Identifier ID)
         {
             VariableDeclaration variableDeclaration = ((VariableDeclaration) Lookup(ID.RootID, DeclarationType.VARIABLE));
 
@@ -126,7 +126,7 @@ namespace CMC
                 variableDeclaration = variableDeclarationInsideStruct;
             }
             
-            return ((VariableDeclarationSimple) variableDeclaration).VariableType.VariableType_;
+            return (VariableDeclarationSimple) variableDeclaration;
         }
 
 
