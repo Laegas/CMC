@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CMC.AST;
@@ -10,12 +9,13 @@ namespace CMC
     public class Encoder : IASTVisitor
     {
         private int nextAdr = Machine.CB; // from Jan
-        private int currentScopeLevel = 0; // from Jan
         public static readonly string FILE_NAME = "combiled.TAM";
+        private StackManager _stackManager = new StackManager();
 
         // Standard environment
         public static DeclarationFunctionDeclaration printFunction;
 
+        
         private void Emit( int op, int n, int r, int d ) // from Jan
         {
             if( n > 255 )
@@ -28,6 +28,52 @@ namespace CMC
             instr.n = n;
             instr.r = r;
             instr.d = d;
+
+            switch (instr.op)
+            {
+                case Machine.LOADop:
+                    _stackManager.IncrementOffset(n);
+                    break;
+                case Machine.LOADAop:
+                case Machine.LOADLop:
+                    _stackManager.IncrementOffset();
+                    break;
+                case Machine.LOADIop:
+                    _stackManager.IncrementOffset(n - 1);
+                    break;
+                case Machine.STOREop:
+                    _stackManager.DecrementOffset(n);
+                    break;
+                case Machine.STOREIop:
+                    _stackManager.DecrementOffset(n + 1);
+                    break;
+                case Machine.CALLop:
+                    _stackManager.IncrementFrameLevel();
+                    break;
+                case Machine.CALLIop:
+                    _stackManager.DecrementOffset(2);
+                    _stackManager.IncrementFrameLevel();
+                    break;
+                case Machine.RETURNop:
+                    _stackManager.DecrementFrameLevel();
+                    _stackManager.DecrementOffset(d);
+                    _stackManager.IncrementOffset(n);
+                    break;
+                case Machine.PUSHop:
+                    _stackManager.IncrementOffset(d);
+                    break;
+                case Machine.POPop:
+                    _stackManager.DecrementOffset(d);
+                    break;
+                case Machine.JUMPIop:
+                case Machine.JUMPIFop:
+                    _stackManager.DecrementOffset();
+                    break;
+                
+
+
+
+            }
 
             if( nextAdr >= Machine.PB )
             {
@@ -79,22 +125,6 @@ namespace CMC
         }
 
 
-        public static void Testing()
-        {
-            var encoder = new Encoder();
-
-            encoder.Emit( Machine.LOADLop, 0, 0, 6 );
-            encoder.Emit( Machine.LOADLop, 0, 0, 7 );
-            encoder.Emit( Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement );
-            encoder.Emit( Machine.HALTop, 0, 0, 0 );
-
-            // this workes amazingly!!
-
-            encoder.SaveTargetProgram(AppContext.BaseDirectory + FILE_NAME );
-        }
-
-
-
         public object VisitArgumentList( ArgumentList argumentList, object o )
         {
             throw new NotImplementedException();
@@ -103,8 +133,8 @@ namespace CMC
         public object VisitDeclarationFunctionDeclaration( DeclarationFunctionDeclaration declarationFunctionDeclaration, object o )
         {
             var savedAddr = nextAdr;
-            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            declarationFunctionDeclaration.FunctionDeclaration.Address = new Address(currentScopeLevel,nextAdr);
+            Emit(Machine.JUMPop, 0, Machine.CBr, -1);
+            declarationFunctionDeclaration.FunctionDeclaration.Address = new Address(0,nextAdr);
             declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
             Patch(savedAddr, nextAdr);
             return null;
@@ -112,10 +142,6 @@ namespace CMC
 
         public object VisitDeclarationStruct( DeclarationStruct declarationStruct, object o )
         {
-            var savedAddr = nextAdr;
-            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            declarationStruct.Struct.Visit(this);
-            Patch(savedAddr, nextAdr);
             return null;
         }
 
@@ -165,19 +191,18 @@ namespace CMC
         {
             foreach( var item in functionCall.ArgumentList.Arguments )
             {
-                Emit( Machine.LOADLop, 0, 0, (int)item.Visit( this ) );
+                item.Visit(this);
             }
 
-            Emit( Machine.CALLop, 0 ,Machine.SBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Address_);
+            Emit( Machine.CALLop, 0 ,Machine.SBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
             return null;
         }
 
         public object VisitFunctionDeclaration( FunctionDeclaration functionDeclaration, object o )
         {
             functionDeclaration.ParameterList.Visit(this);
-            functionDeclaration.Statements.Visit(this);
+            functionDeclaration.Statements.Visit(this, functionDeclaration);
 
-            Emit(Machine.RETURNop, 0, 0, functionDeclaration.ParameterList.Parameters.Count);
             return null;
         }
 
@@ -214,24 +239,30 @@ namespace CMC
 
         public object VisitPrimaryIdentifier( PrimaryIdentifier primaryIdentifier, object o )
         {
-            primaryIdentifier.IDsDeclaration
-            throw new NotImplementedException();
+            var address = primaryIdentifier.IDsDeclaration.Address;
+            int register = DisplayRegister(_stackManager.GetCurrentAddress().FrameLevel, address.FrameLevel);
+            Emit(Machine.LOADop, 1, register, address.Offset);
+            return null;
         }
 
         public object VisitPrimaryIntyLiteral( PrimaryIntyLiteral primaryIntyLiteral, object o )
         {
-            return Convert.ToInt32(primaryIntyLiteral.Value.Spelling);
+            Emit(Machine.LOADLop, 0, 0, Convert.ToInt32(primaryIntyLiteral.Value.Spelling));
+            return null;
         }
 
         private void DefineSTD()
         {
             var savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            printFunction.FunctionDeclaration.Address = new Address(currentScopeLevel, nextAdr);
+            printFunction.FunctionDeclaration.Address = new Address(0, nextAdr);
 
             Emit(Machine.LOADop, 1, Machine.LBr, -1);
             Emit(Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement);
             Emit( Machine.CALLop, 0, Machine.PBr, Machine.puteolDisplacement );
+            // Because return statement is not in our source code.
+            _stackManager.DecrementFrameLevel();
+            _stackManager.DecrementOffset();
             Emit(Machine.RETURNop, 0, 0, 0);
 
             Patch(savedAddr, nextAdr);
@@ -244,7 +275,7 @@ namespace CMC
             program.Declarations.ForEach( item => item.Visit( this, null ) );
 
             //call start function 
-            Emit(Machine.CALLop, 0, Machine.CBr, program.StartDeclaration.FunctionDeclaration.Address.Address_);
+            Emit(Machine.CALLop, 0, Machine.CBr, program.StartDeclaration.FunctionDeclaration.Address.Offset);
 
             Emit( Machine.HALTop, 0, 0, 0 );
             return null;
@@ -262,19 +293,11 @@ namespace CMC
 
         public object VisitStatementAssignment( StatementAssignment statementAssignment, object o )
         {
-            //statementAssignment.IDsDeclaration.Address
-            Emit( Machine.LOADLop, 0, 0, (int)statementAssignment.Expression.Visit( this ) ); // pushing value to stack
-            //Emit( Machine.STOREop,1, )
-            throw new NotImplementedException();
-
-            //if(statementAssignment.Identifier.NestedIDs.Count == 0 )
-            //{
-            //    statementAssignment.IDsDeclaration.
-            //}
-            //else
-            //{
-            //    throw new NotImplementedException();
-            //}
+            statementAssignment.Expression.Visit(this);
+            var statementAddress = statementAssignment.IDsDeclaration.Address;
+            var register = DisplayRegister(_stackManager.GetCurrentAddress().FrameLevel, statementAddress.FrameLevel);
+            Emit(Machine.STOREop, 1, register, statementAddress.Offset);
+            return null;
         }
 
         public object VisitStatementFunctionCall( StatementFunctionCall statementFunctionCall, object o )
@@ -286,7 +309,19 @@ namespace CMC
 
         public object VisitStatementGiveBack( StatementGiveBack statementGiveBack, object o )
         {
-            throw new NotImplementedException();
+            var functionDeclaration = o as FunctionDeclaration;
+            var parametersSize = functionDeclaration.ParameterList.Parameters.Count; // TODO Parameter size won't work for structs.
+            if (statementGiveBack.Expression == null)
+            {
+                Emit(Machine.RETURNop, 0, 0, parametersSize);
+            }
+            else
+            {
+                statementGiveBack.Expression.Visit(this);
+                Emit(Machine.RETURNop, 1, 0, parametersSize);
+            }
+
+            return null;
         }
 
         public object VisitStatementIfStatement( StatementIfStatement statementIfStatement, object o )
@@ -301,7 +336,7 @@ namespace CMC
 
         public object VisitStatements( Statements statements, object o )
         {
-            statements.Statements_.ForEach(item => item.Visit(this));
+            statements.Statements_.ForEach(item => item.Visit(this, o));
             return null;
         }
 
@@ -333,15 +368,14 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple( VariableDeclarationSimple variableDeclarationSimple, object o )
         {
-            variableDeclarationSimple.Address = new Address(currentScopeLevel, nextAdr);
+            variableDeclarationSimple.Address = _stackManager.GetCurrentAddress();
             if (variableDeclarationSimple.Expression == null)
             {
                 Emit(Machine.PUSHop, 0, 0, 1);
             }
             else
             {
-                var result = (int)variableDeclarationSimple.Expression.Visit(this);
-                Emit(Machine.LOADIop, 0, 0, result);
+                variableDeclarationSimple.Expression.Visit(this);
             }
             return null;
         }

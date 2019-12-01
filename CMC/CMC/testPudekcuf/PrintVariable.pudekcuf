@@ -7,8 +7,10 @@ function start takes nothing givesBack inty [
 	call print with a;
 #	call print with b;
 
-	a = 7;
+	a = 9;
 
 #	call print with a;
+
+    giveBack a;
 ]
 

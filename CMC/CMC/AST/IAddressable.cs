@@ -12,13 +12,13 @@ namespace CMC.AST
 
     public class Address
     {
-        public int ScopeLevel { get; private set; }
-        public int Address_ { get; private set; }
+        public int FrameLevel { get; private set; }
+        public int Offset { get; private set; }
 
-        public Address(int scopeLevel, int address )
+        public Address(int frameLevel, int offset )
         {
-            this.ScopeLevel = scopeLevel;
-            this.Address_ = address;
+            FrameLevel = frameLevel;
+            Offset = offset;
         }
     }
 }

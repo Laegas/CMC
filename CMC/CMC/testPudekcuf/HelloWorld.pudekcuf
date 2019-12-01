@@ -2,6 +2,7 @@
 inty a;
 
 function start takes nothing givesBack inty [
-	call print with 5;
+	call print with 7;
+	giveBack 0;
 ]
 

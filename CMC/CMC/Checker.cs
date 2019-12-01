@@ -395,7 +395,7 @@ namespace CMC
 
         public object VisitStatements(Statements statements, object o)
         {
-            if (o is ReturnTypeVariableType)
+            if (idTable.ExpectedReturnType != VariableType.ValueTypeEnum.NOTHING)
             {
                 if (!statements.Statements_.Any(statement => statement is StatementGiveBack))
                 {

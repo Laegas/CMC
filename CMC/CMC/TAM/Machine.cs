@@ -35,7 +35,7 @@ namespace CMC.TAM
         // INSTRUCTIONS
 
         // Operation codes
-        public readonly static int
+        public const int
           LOADop = 0,
           LOADAop = 1,
           LOADIop = 2,

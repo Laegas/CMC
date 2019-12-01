@@ -19,6 +19,9 @@
     <None Update="testProgramForScanner.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="testPudekcuf\PrintVariable.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

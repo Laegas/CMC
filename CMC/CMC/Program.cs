@@ -38,8 +38,6 @@ namespace CMC
             Console.WriteLine(output);
             Console.WriteLine("\n\nFinished parsing file");
 
-
-            Console.ReadKey();
         }
     }
 }
