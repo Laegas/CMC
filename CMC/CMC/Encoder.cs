@@ -115,7 +115,12 @@ namespace CMC
 
         public object VisitArgumentList( ArgumentList argumentList, object o )
         {
-            throw new NotImplementedException();
+            foreach( var item in argumentList.Arguments )
+            {
+                item.Visit(this);
+            }
+
+            return null;
         }
 
         public object VisitDeclarationFunctionDeclaration( DeclarationFunctionDeclaration declarationFunctionDeclaration, object o )
@@ -132,6 +137,7 @@ namespace CMC
 
         public object VisitDeclarationStruct( DeclarationStruct declarationStruct, object o )
         {
+            declarationStruct.Struct.Visit(this);
             return null;
         }
 
@@ -229,10 +235,7 @@ namespace CMC
 
         public object VisitFunctionCall( FunctionCall functionCall, object o )
         {
-            foreach( var item in functionCall.ArgumentList.Arguments )
-            {
-                item.Visit(this);
-            }
+            functionCall.ArgumentList.Visit(this);
 
             Emit( Machine.CALLop, 0 ,Machine.CBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
             return null;
