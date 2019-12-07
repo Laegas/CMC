@@ -461,7 +461,10 @@ namespace CMC
         public object VisitFunctionCall(FunctionCall functionCall, object o)
         {
             functionCall.FunctionDeclaration = (DeclarationFunctionDeclaration) idTable.Lookup(functionCall.FunctionName, IDTable.DeclarationType.FUNCTION);
+            // TODO might be a hack
+            idTable.EnterNestedScopeLevel();
             functionCall.ArgumentList.Visit(this, functionCall.FunctionDeclaration.FunctionDeclaration.ParameterList);
+            idTable.ExitNestedScopeLevel();
             return null;
         }
 

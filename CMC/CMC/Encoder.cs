@@ -47,18 +47,18 @@ namespace CMC
                 case Machine.STOREIop:
                     _stackManager.DecrementOffset(n + 1);
                     break;
-                case Machine.CALLop:
-                    _stackManager.IncrementFrameLevel();
-                    break;
-                case Machine.CALLIop:
-                    _stackManager.DecrementOffset(2);
-                    _stackManager.IncrementFrameLevel();
-                    break;
-                case Machine.RETURNop:
-                    _stackManager.DecrementFrameLevel();
-                    _stackManager.DecrementOffset(d);
-                    _stackManager.IncrementOffset(n);
-                    break;
+//                case Machine.CALLop:
+//                    _stackManager.IncrementFrameLevel();
+//                    break;
+//                case Machine.CALLIop:
+//                    _stackManager.DecrementOffset(2);
+//                    _stackManager.IncrementFrameLevel();
+//                    break;
+//                case Machine.RETURNop:
+//                    _stackManager.DecrementFrameLevel();
+//                    _stackManager.DecrementOffset(d);
+//                    _stackManager.IncrementOffset(n);
+//                    break;
                 case Machine.PUSHop:
                     _stackManager.IncrementOffset(d);
                     break;
@@ -69,10 +69,6 @@ namespace CMC
                 case Machine.JUMPIFop:
                     _stackManager.DecrementOffset();
                     break;
-                
-
-
-
             }
 
             if( nextAdr >= Machine.PB )
@@ -92,17 +88,9 @@ namespace CMC
             Machine.code[ adr ].d = d;
         }
 
-        private int DisplayRegister( int currentLevel, int entityLevel ) //from Jan
+        private int DisplayRegister( Address address ) //from Jan
         {
-            if( entityLevel == 0 )
-                return Machine.SBr;
-            else if( currentLevel - entityLevel <= 6 )
-                return Machine.LBr + currentLevel - entityLevel;
-            else
-            {
-                throw new Exception( "Accessing across to many levels" );
-                //return Machine.L6r;
-            }
+            return address.IsGlobalScope ? Machine.SBr : Machine.LBr;
         }
 
 
@@ -134,8 +122,10 @@ namespace CMC
         {
             var savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, -1);
-            declarationFunctionDeclaration.FunctionDeclaration.Address = new Address(0,nextAdr);
+            declarationFunctionDeclaration.FunctionDeclaration.Address.Offset = nextAdr;
+            _stackManager.IncrementFrameLevel();
             declarationFunctionDeclaration.FunctionDeclaration.Visit(this);
+            _stackManager.DecrementFrameLevel();
             Patch(savedAddr, nextAdr);
             return null;
         }
@@ -167,11 +157,31 @@ namespace CMC
         {
             if (expression2.Operator2 == null)
             {
-                return expression2.Expression3.Visit(this);
+                expression2.Expression3.Visit(this);
+                return null;
             }
             else
             {
-                throw new NotImplementedException();
+                expression2.Expression3.Visit(this);
+                expression2.Expression1.Visit(this);
+                int operatorAsDisplacement;
+                switch (expression2.Operator2.Spelling)
+                {
+                    case "+":
+                        operatorAsDisplacement = Machine.addDisplacement;
+                        break;
+                    case "-":
+                        operatorAsDisplacement = Machine.subDisplacement;
+                        break;
+                    case "or":
+                        operatorAsDisplacement = Machine.orDisplacement;
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid operator");
+                }
+                Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
+                _stackManager.DecrementOffset();
+                return null;
             }
         }
 
@@ -183,7 +193,26 @@ namespace CMC
             }
             else
             {
-                throw new NotImplementedException();
+                expression3.Primary.Visit(this);
+                expression3.Expression1.Visit(this);
+                int operatorAsDisplacement;
+                switch (expression3.Operator3.Spelling)
+                {
+                    case "*":
+                        operatorAsDisplacement = Machine.multDisplacement;
+                        break;
+                    case "/":
+                        operatorAsDisplacement = Machine.divDisplacement;
+                        break;
+                    case "and":
+                        operatorAsDisplacement = Machine.andDisplacement;
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid operator");
+                }
+                Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
+                _stackManager.DecrementOffset();
+                return null;
             }
         }
 
@@ -194,7 +223,7 @@ namespace CMC
                 item.Visit(this);
             }
 
-            Emit( Machine.CALLop, 0 ,Machine.SBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
+            Emit( Machine.CALLop, 0 ,Machine.CBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
             return null;
         }
 
@@ -229,7 +258,9 @@ namespace CMC
 
         public object VisitPrimaryExpression( PrimaryExpression primaryExpression, object o )
         {
-            throw new NotImplementedException();
+//            throw new NotImplementedException();
+            primaryExpression.Expression.Visit(this);
+            return null;
         }
 
         public object VisitPrimaryFunctionCall( PrimaryFunctionCall primaryFunctionCall, object o )
@@ -240,7 +271,7 @@ namespace CMC
         public object VisitPrimaryIdentifier( PrimaryIdentifier primaryIdentifier, object o )
         {
             var address = primaryIdentifier.IDsDeclaration.Address;
-            int register = DisplayRegister(_stackManager.GetCurrentAddress().FrameLevel, address.FrameLevel);
+            int register = DisplayRegister(address);
             Emit(Machine.LOADop, 1, register, address.Offset);
             return null;
         }
@@ -254,16 +285,17 @@ namespace CMC
         private void DefineSTD()
         {
             var savedAddr = nextAdr;
-            Emit(Machine.JUMPop, 0, Machine.CBr, 0);
-            printFunction.FunctionDeclaration.Address = new Address(0, nextAdr);
+            Emit(Machine.JUMPop, 0, Machine.CBr, -1);
+//            _stackManager.IncrementFrameLevel();
+            printFunction.FunctionDeclaration.Address.Offset = nextAdr;
 
             Emit(Machine.LOADop, 1, Machine.LBr, -1);
             Emit(Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement);
+            _stackManager.DecrementOffset();
             Emit( Machine.CALLop, 0, Machine.PBr, Machine.puteolDisplacement );
             // Because return statement is not in our source code.
-            _stackManager.DecrementFrameLevel();
-            _stackManager.DecrementOffset();
-            Emit(Machine.RETURNop, 0, 0, 0);
+            Emit(Machine.RETURNop, 0, 0, 1);
+//            _stackManager.DecrementFrameLevel();
 
             Patch(savedAddr, nextAdr);
         }
@@ -295,7 +327,7 @@ namespace CMC
         {
             statementAssignment.Expression.Visit(this);
             var statementAddress = statementAssignment.IDsDeclaration.Address;
-            var register = DisplayRegister(_stackManager.GetCurrentAddress().FrameLevel, statementAddress.FrameLevel);
+            var register = DisplayRegister(statementAddress);
             Emit(Machine.STOREop, 1, register, statementAddress.Offset);
             return null;
         }
@@ -368,7 +400,7 @@ namespace CMC
 
         public object VisitVariableDeclarationSimple( VariableDeclarationSimple variableDeclarationSimple, object o )
         {
-            variableDeclarationSimple.Address = _stackManager.GetCurrentAddress();
+            variableDeclarationSimple.Address.Offset = _stackManager.CurrentOffset;
             if (variableDeclarationSimple.Expression == null)
             {
                 Emit(Machine.PUSHop, 0, 0, 1);

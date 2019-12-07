@@ -52,15 +52,14 @@ namespace CMC.AST
     }
 
 
-    public abstract class VariableDeclaration : Declaration
+    public abstract class VariableDeclaration : Declaration, IAddressable
     {
         public abstract UserCreatableID Name{ get; }
+        public Address Address { get; set; }
     }
 
-    public class VariableDeclarationSimple : VariableDeclaration, IAddressable
+    public class VariableDeclarationSimple : VariableDeclaration
     {
-        public Address Address { get; set; }
-
         public VariableType VariableType { get; }
         public UserCreatableID VariableName { get; }
         public Expression1 Expression { get; }

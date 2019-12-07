@@ -6,9 +6,10 @@ namespace CMC
 {
     class StackManager
     {
-        
         private int _currentFrameLevel = 0; // from Jan
         private List<int> offsets = new List<int>(); // from Jan
+
+        public int CurrentOffset => offsets[_currentFrameLevel];
 
         public StackManager()
         {
@@ -36,12 +37,5 @@ namespace CMC
         {
             offsets[_currentFrameLevel] -= delta;
         }
-
-        public Address GetCurrentAddress()
-        {
-            return new Address(_currentFrameLevel, offsets[_currentFrameLevel]);
-        }
-        
-        
     }
 }

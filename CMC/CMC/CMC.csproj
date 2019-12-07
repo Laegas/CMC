@@ -22,10 +22,9 @@
     <None Update="testPudekcuf\PrintVariable.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="checker" />
+    <None Update="testPudekcuf\QuickMath.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

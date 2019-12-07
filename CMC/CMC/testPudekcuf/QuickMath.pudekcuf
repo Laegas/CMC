@@ -1,0 +1,13 @@
+﻿inty a = 0 + (7 + 5) * 10;
+inty b = 5 * 7;
+inty c = 10 / 5;
+inty d = 10 - 5;
+
+function start takes nothing givesBack inty [
+	call print with a;
+	call print with b;
+	call print with c;
+	call print with d;
+    giveBack 11;
+]
+

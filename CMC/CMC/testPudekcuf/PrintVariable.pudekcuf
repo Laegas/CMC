@@ -1,16 +1,20 @@
 ﻿
 inty a = 5;
+inty c = 13;
 
 function start takes nothing givesBack inty [
 	inty b = 7;
 
 	call print with a;
-#	call print with b;
+	call print with b;
 
 	a = 9;
 
-#	call print with a;
+	call print with a;
+	
+	a = c;
+	call print with a;
 
-    giveBack a;
+    giveBack 11;
 ]
 

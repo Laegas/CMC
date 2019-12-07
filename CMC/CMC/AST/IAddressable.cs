@@ -12,13 +12,12 @@ namespace CMC.AST
 
     public class Address
     {
-        public int FrameLevel { get; private set; }
-        public int Offset { get; private set; }
+        public bool IsGlobalScope { get; }
+        public int Offset { get; set; }
 
-        public Address(int frameLevel, int offset )
+        public Address(bool isGlobalScope)
         {
-            FrameLevel = frameLevel;
-            Offset = offset;
+            IsGlobalScope = isGlobalScope;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace CMC
@@ -12,7 +13,8 @@ namespace CMC
 
             return;
             */
-            var sourceFile = new SourceFile(@"testPudekcuf/PrintVariable.pudekcuf");
+            File.Delete(@"combiled.TAM");
+            var sourceFile = new SourceFile(@"testPudekcuf/QuickMath.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);

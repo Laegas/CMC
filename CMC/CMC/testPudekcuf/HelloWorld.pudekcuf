@@ -1,8 +1,9 @@
 ﻿
-inty a;
+inty a = 5;
 
 function start takes nothing givesBack inty [
-	call print with 7;
-	giveBack 0;
+	call print with a;
+	call print with a;
+	giveBack 2;
 ]
 

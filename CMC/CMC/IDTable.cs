@@ -44,7 +44,7 @@ namespace CMC
             enviornment = new List<(int scopeLevel, UserCreatableID ID, Declaration declaration, DeclarationType type)>();
         }
 
-        public void Add(UserCreatableID ID, Declaration subTreePointer, DeclarationType type)
+        public void Add(UserCreatableID ID, Declaration declaration, DeclarationType type)
         {
             if (enviornment.Any(env => env.scopeLevel == _currentScopeLevel && env.ID.Spelling == ID.Spelling && env.type == type))
             {
@@ -54,7 +54,7 @@ namespace CMC
             //checks for "start" function
             if (type == DeclarationType.FUNCTION && ID.Spelling == "start")
             {
-                var funcDec = (DeclarationFunctionDeclaration) subTreePointer;
+                var funcDec = (DeclarationFunctionDeclaration) declaration;
 
                 if (funcDec.FunctionDeclaration.ReturnType.ValueType == VariableType.ValueTypeEnum.INTY &&
                     funcDec.FunctionDeclaration.ParameterList.Parameters.Count == 0)
@@ -67,7 +67,18 @@ namespace CMC
                 }
             }
 
-            enviornment.Add((_currentScopeLevel, ID, subTreePointer, type));
+            // TODO For struct
+            if (declaration is VariableDeclarationSimple variableDeclaration)
+            {
+                variableDeclaration.Address = new Address(_currentScopeLevel == 0);
+            }
+
+            if (declaration is DeclarationFunctionDeclaration functionDeclaration)
+            {
+                functionDeclaration.FunctionDeclaration.Address = new Address(true);
+            }
+
+            enviornment.Add((_currentScopeLevel, ID, declaration, type));
         }
 
         public bool IsInLoopScope()
