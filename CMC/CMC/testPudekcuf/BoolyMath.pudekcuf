@@ -1,0 +1,22 @@
+﻿booly e = 5 is 5;
+booly f = 5 is 7;
+booly g = aye;
+booly h = nay;
+booly i = aye is nay;
+booly j = aye is aye;
+booly k = nay is aye;
+booly l = nay is nay is aye;
+#booly m = 5 is 7 is nay; # I think there's a problem with expression order in Parser.
+
+function start takes nothing givesBack inty [
+	call print with e;
+	call print with f;
+	call print with g;
+	call print with h;
+	call print with i;
+	call print with j;
+	call print with k;
+	call print with l;
+#	call print with m;
+    giveBack 11;
+]

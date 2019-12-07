@@ -68,7 +68,7 @@ namespace CMC.AST
 
         public enum ValueTypeEnum
         {
-            INTY, BOOLY, NOTHING
+            INTY, BOOLY, NOTHING, ANY
         }
         
         public ValueTypeEnum VariableType_ { get; }
@@ -76,9 +76,14 @@ namespace CMC.AST
         public VariableType(Token token) : base(token.Spelling)
         {
             CheckTokenType(Token.TokenType.VARIABLE_TYPE, token.TheTokenType);
-            VariableType_ = token.TheTokenType == Token.TokenType.BOOLY_LITERAL
+            VariableType_ = token.Spelling == "booly"
                 ? ValueTypeEnum.BOOLY
                 : ValueTypeEnum.INTY;
+        }
+
+        public VariableType(ValueTypeEnum variableType) : base(variableType.ToString())
+        {
+            VariableType_ = variableType;
         }
     }
 

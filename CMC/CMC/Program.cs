@@ -14,13 +14,14 @@ namespace CMC
             return;
             */
             File.Delete(@"combiled.TAM");
-            var sourceFile = new SourceFile(@"testPudekcuf/QuickMath.pudekcuf");
+            var sourceFile = new SourceFile(@"testPudekcuf/BoolyMath.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);
             var program = parser.ParseProgram();
             var output = JsonConvert.SerializeObject(program, Formatting.Indented);
 
+            Console.WriteLine(output);
             var checker = new SemanticCheckerAndDecorater();
 
             program.Visit( checker ); // semantic checker and tree decorater
@@ -37,7 +38,6 @@ namespace CMC
             //        break;
             //    }
             //}
-            Console.WriteLine(output);
             Console.WriteLine("\n\nFinished parsing file");
 
         }

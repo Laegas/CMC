@@ -25,6 +25,9 @@
     <None Update="testPudekcuf\QuickMath.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="testPudekcuf\BoolyMath.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

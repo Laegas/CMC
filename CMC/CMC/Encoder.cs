@@ -145,12 +145,26 @@ namespace CMC
         {
             if (expression1.Operator1 == null)
             {
-                return expression1.Expression2.Visit(this);
+                expression1.Expression2.Visit(this);
+                return null;
             }
-            else
+            
+            expression1.Expression2.Visit(this);
+            expression1.Expression1_.Visit(this);
+            int operatorAsDisplacement;
+            switch (expression1.Operator1.Spelling)
             {
-                throw new NotImplementedException();
+                case "is":
+                    operatorAsDisplacement = Machine.eqDisplacement;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid operator");
             }
+            Emit(Machine.LOADLop, 0, 0, 1);
+            Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
+            _stackManager.DecrementOffset();
+            _stackManager.DecrementOffset();
+            return null;
         }
 
         public object VisitExpression2( Expression2 expression2, object o )
@@ -160,60 +174,57 @@ namespace CMC
                 expression2.Expression3.Visit(this);
                 return null;
             }
-            else
+
+            expression2.Expression3.Visit(this);
+            expression2.Expression1.Visit(this);
+            int operatorAsDisplacement;
+            switch (expression2.Operator2.Spelling)
             {
-                expression2.Expression3.Visit(this);
-                expression2.Expression1.Visit(this);
-                int operatorAsDisplacement;
-                switch (expression2.Operator2.Spelling)
-                {
-                    case "+":
-                        operatorAsDisplacement = Machine.addDisplacement;
-                        break;
-                    case "-":
-                        operatorAsDisplacement = Machine.subDisplacement;
-                        break;
-                    case "or":
-                        operatorAsDisplacement = Machine.orDisplacement;
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid operator");
-                }
-                Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
-                _stackManager.DecrementOffset();
-                return null;
+                case "+":
+                    operatorAsDisplacement = Machine.addDisplacement;
+                    break;
+                case "-":
+                    operatorAsDisplacement = Machine.subDisplacement;
+                    break;
+                case "or":
+                    operatorAsDisplacement = Machine.orDisplacement;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid operator");
             }
+            Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
+            _stackManager.DecrementOffset();
+            return null;
         }
 
         public object VisitExpression3( Expression3 expression3, object o )
         {
             if (expression3.Operator3 == null)
             {
-                return expression3.Primary.Visit(this);
-            }
-            else
-            {
                 expression3.Primary.Visit(this);
-                expression3.Expression1.Visit(this);
-                int operatorAsDisplacement;
-                switch (expression3.Operator3.Spelling)
-                {
-                    case "*":
-                        operatorAsDisplacement = Machine.multDisplacement;
-                        break;
-                    case "/":
-                        operatorAsDisplacement = Machine.divDisplacement;
-                        break;
-                    case "and":
-                        operatorAsDisplacement = Machine.andDisplacement;
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid operator");
-                }
-                Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
-                _stackManager.DecrementOffset();
                 return null;
             }
+
+            expression3.Primary.Visit(this);
+            expression3.Expression1.Visit(this);
+            int operatorAsDisplacement;
+            switch (expression3.Operator3.Spelling)
+            {
+                case "*":
+                    operatorAsDisplacement = Machine.multDisplacement;
+                    break;
+                case "/":
+                    operatorAsDisplacement = Machine.divDisplacement;
+                    break;
+                case "and":
+                    operatorAsDisplacement = Machine.andDisplacement;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid operator");
+            }
+            Emit(Machine.CALLop, Machine.CB, Machine.PBr, operatorAsDisplacement);
+            _stackManager.DecrementOffset();
+            return null;
         }
 
         public object VisitFunctionCall( FunctionCall functionCall, object o )
@@ -253,19 +264,20 @@ namespace CMC
 
         public object VisitPrimaryBoolyLiteral( PrimaryBoolyLiteral primaryBoolyLiteral, object o )
         {
-            throw new NotImplementedException();
+            Emit(Machine.LOADLop, 0, 0, Convert.ToInt32(primaryBoolyLiteral.Value.Spelling == "aye" ? 1 : 0));
+            return null;
         }
 
         public object VisitPrimaryExpression( PrimaryExpression primaryExpression, object o )
         {
-//            throw new NotImplementedException();
             primaryExpression.Expression.Visit(this);
             return null;
         }
 
         public object VisitPrimaryFunctionCall( PrimaryFunctionCall primaryFunctionCall, object o )
         {
-            throw new NotImplementedException();
+            primaryFunctionCall.FunctionCall.Visit(this);
+            return null;
         }
 
         public object VisitPrimaryIdentifier( PrimaryIdentifier primaryIdentifier, object o )
@@ -335,7 +347,8 @@ namespace CMC
         public object VisitStatementFunctionCall( StatementFunctionCall statementFunctionCall, object o )
         {
             statementFunctionCall.FunctionCall.Visit(this);
-            // todo POP 0 (returnSize)
+            int returnSize = statementFunctionCall.FunctionCall.FunctionDeclaration.FunctionDeclaration.ReturnType.ValueType == VariableType.ValueTypeEnum.NOTHING ? 0 : 1;
+            Emit(Machine.POPop, 0, 0, returnSize);
             return null;
         }
 

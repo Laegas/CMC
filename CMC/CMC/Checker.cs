@@ -22,9 +22,10 @@ namespace CMC
 
             for (int i = 0; i < argumentList.Arguments.Count; i++)
             {
-                var typeOfValueReturnedByExpression = (VariableType.ValueTypeEnum) argumentList.Arguments[i].Visit(this);
+                var expressionType = (VariableType.ValueTypeEnum) argumentList.Arguments[i].Visit(this);
+                var parameterType = parameterList.Parameters[i].ParameterType.VariableType_;
 
-                if (typeOfValueReturnedByExpression == parameterList.Parameters[i].ParameterType.VariableType_)
+                if (parameterType == VariableType.ValueTypeEnum.ANY || expressionType == parameterType)
                 {
                     // bind to idTable
                     var decl = new VariableDeclarationSimple(parameterList.Parameters[i].ParameterType,
@@ -126,7 +127,7 @@ namespace CMC
             {
                 return expression1.Expression2.Visit(this);
             }
-            
+
             var t1 = (VariableType.ValueTypeEnum) expression1.Expression2.Visit(this);
             var t2 = (VariableType.ValueTypeEnum) expression1.Expression1_.Visit(this);
 
@@ -285,7 +286,7 @@ namespace CMC
         {
             var parameterList = new ParameterList(new List<Parameter>());
             parameterList.Parameters.Add(new Parameter(
-                    new VariableType(new Token("inty" /* doesn't matter */, Token.TokenType.VARIABLE_TYPE)),
+                    new VariableType(VariableType.ValueTypeEnum.ANY),
                     new UserCreatableID(new Token("blah" /* doesn't matter */, Token.TokenType.USER_CREATABLE_ID))));
 
             var printFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
@@ -448,6 +449,7 @@ namespace CMC
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
             idTable.Add(structVariableDeclaration.VariableName, new VariableDeclarationStructVariableDeclaration(structVariableDeclaration), IDTable.DeclarationType.VARIABLE);
+            structVariableDeclaration.Struct = ((DeclarationStruct)idTable.Lookup(structVariableDeclaration.StructName, IDTable.DeclarationType.STRUCT)).Struct;
             return null;
         }
 

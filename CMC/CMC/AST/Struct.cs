@@ -25,6 +25,7 @@ namespace CMC.AST
     {
         public UserCreatableID StructName { get; }
         public UserCreatableID VariableName { get; }
+        public Struct Struct { get; set; }
 
         public StructVariableDeclaration(UserCreatableID structName, UserCreatableID variableName)
         {
