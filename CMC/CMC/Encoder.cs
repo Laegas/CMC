@@ -374,7 +374,16 @@ namespace CMC
 
         public object VisitStatementIfStatement( StatementIfStatement statementIfStatement, object o )
         {
-            throw new NotImplementedException();
+            statementIfStatement.Condition.Visit(this);
+
+            var savedAddr = nextAdr;
+            Emit(Machine.JUMPIFop, 0, Machine.CBr, -1);
+
+            statementIfStatement.Statements.Visit(this);
+
+            Patch(savedAddr, nextAdr);
+
+            return null;
         }
 
         public object VisitStatementLoopStatement( StatementLoopStatement statementLoopStatement, object o )

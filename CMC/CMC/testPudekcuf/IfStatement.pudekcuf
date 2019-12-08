@@ -1,0 +1,33 @@
+﻿
+booly g = aye;
+booly h = nay;
+
+function start takes nothing givesBack inty [
+	
+	if aye [
+		call print with 21;
+	]
+
+	if nay [
+		call print with 22;
+	]
+
+	booly a = aye;
+	booly b = nay;
+
+	call print with a;
+	call print with b;
+	
+	call print with g;
+	call print with h;
+
+	if a [
+		call print with 23;
+	]
+
+	if 2 is 2 [
+		call print with 24;
+	]
+
+    giveBack 11;
+]

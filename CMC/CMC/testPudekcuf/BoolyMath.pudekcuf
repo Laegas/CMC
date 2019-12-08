@@ -6,7 +6,7 @@ booly i = aye is nay;
 booly j = aye is aye;
 booly k = nay is aye;
 booly l = nay is nay is aye;
-#booly m = 5 is 7 is nay; # I think there's a problem with expression order in Parser.
+booly m = nay is 7 is 5;
 
 function start takes nothing givesBack inty [
 	call print with e;
@@ -17,6 +17,6 @@ function start takes nothing givesBack inty [
 	call print with j;
 	call print with k;
 	call print with l;
-#	call print with m;
+	call print with m;
     giveBack 11;
 ]

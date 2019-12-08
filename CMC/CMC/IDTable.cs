@@ -18,6 +18,10 @@ namespace CMC
         {
             get
             {
+                if(_currentScopeLevel != 1)
+                {
+                    return VariableType.ValueTypeEnum.NOTHING;
+                }
                 if (CurrentExpectedReturnType.HasValue)
                 {
                     return CurrentExpectedReturnType.Value;
