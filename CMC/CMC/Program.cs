@@ -14,7 +14,7 @@ namespace CMC
             return;
             */
             File.Delete(@"combiled.TAM");
-            var sourceFile = new SourceFile(@"testPudekcuf/IfStatement.pudekcuf");
+            var sourceFile = new SourceFile(@"testPudekcuf/Debug.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);

@@ -238,6 +238,7 @@ namespace CMC
             functionCall.ArgumentList.Visit(this);
 
             Emit( Machine.CALLop, 0 ,Machine.CBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
+            _stackManager.DecrementOffset(functionCall.FunctionDeclaration.FunctionDeclaration.ParameterList.Parameters.Count);
             return null;
         }
 
@@ -330,12 +331,12 @@ namespace CMC
 
         public object VisitReturnTypeNothing( ReturnTypeNothing returnTypeNothing, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitReturnVariableType( ReturnTypeVariableType returnTypeVariableType, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitStatementAssignment( StatementAssignment statementAssignment, object o )
@@ -379,7 +380,7 @@ namespace CMC
             var savedAddr = nextAdr;
             Emit(Machine.JUMPIFop, 0, Machine.CBr, -1);
 
-            statementIfStatement.Statements.Visit(this);
+            statementIfStatement.Statements.Visit(this, o);
 
             Patch(savedAddr, nextAdr);
 
@@ -388,7 +389,24 @@ namespace CMC
 
         public object VisitStatementLoopStatement( StatementLoopStatement statementLoopStatement, object o )
         {
-            throw new NotImplementedException();
+            // TODO Fix condition to work with math.
+            var skipAddress = nextAdr;
+            Emit(Machine.JUMPop, 0, Machine.CBr,  -1);
+            var stopTheLoopAddress = nextAdr;
+            Emit(Machine.JUMPop, 0, Machine.CBr,  -1);
+            Patch(skipAddress, nextAdr);
+            
+            statementLoopStatement.Condition.Visit(this);
+            var savedAddr = nextAdr;
+            Emit(Machine.JUMPIFop, 0, Machine.CBr, -1);
+
+            statementLoopStatement.Statements.Visit(this, stopTheLoopAddress);
+
+            Emit(Machine.JUMPop, 0, Machine.CBr, savedAddr - 1);
+            Patch(savedAddr, nextAdr);
+            Patch(stopTheLoopAddress, nextAdr);
+
+            return null;
         }
 
         public object VisitStatements( Statements statements, object o )
@@ -399,7 +417,9 @@ namespace CMC
 
         public object VisitStatementStopTheLoop( StatementStopTheLoop statementStopTheLoop, object o )
         {
-            throw new NotImplementedException();
+            var stopTheLoopAddress = (int)o;
+            Emit(Machine.JUMPop, 0, Machine.CBr, stopTheLoopAddress);
+            return null;
         }
 
         public object VisitStatementVariableDeclaration( StatementVariableDeclaration statementVariableDeclaration, object o )
