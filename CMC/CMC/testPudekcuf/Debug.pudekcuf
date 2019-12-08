@@ -5,12 +5,9 @@ function start takes nothing givesBack inty [
 
     inty a = 1;
 	
-    loop g [
+    loop (a is 5) is nay [
         call print with a;
         a = a + 1;
-        if a is 5 [
-            stopTheLoop;
-        ]
     ]
 
     giveBack 11;

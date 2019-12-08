@@ -389,21 +389,21 @@ namespace CMC
 
         public object VisitStatementLoopStatement( StatementLoopStatement statementLoopStatement, object o )
         {
-            // TODO Fix condition to work with math.
-            var skipAddress = nextAdr;
+            var loopStartAddress = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr,  -1);
             var stopTheLoopAddress = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr,  -1);
-            Patch(skipAddress, nextAdr);
-            
+            Patch(loopStartAddress, nextAdr);
+
+            var conditionEvaluationAddress = nextAdr;
             statementLoopStatement.Condition.Visit(this);
-            var savedAddr = nextAdr;
+            var jumpIfAddress = nextAdr;
             Emit(Machine.JUMPIFop, 0, Machine.CBr, -1);
 
             statementLoopStatement.Statements.Visit(this, stopTheLoopAddress);
 
-            Emit(Machine.JUMPop, 0, Machine.CBr, savedAddr - 1);
-            Patch(savedAddr, nextAdr);
+            Emit(Machine.JUMPop, 0, Machine.CBr, conditionEvaluationAddress);
+            Patch(jumpIfAddress, nextAdr);
             Patch(stopTheLoopAddress, nextAdr);
 
             return null;
