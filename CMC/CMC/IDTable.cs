@@ -13,6 +13,7 @@ namespace CMC
         private int _currentScopeLevel;
         private VariableType.ValueTypeEnum? CurrentExpectedReturnType;
         public DeclarationFunctionDeclaration StartFunction { get; private set; }
+        public bool IsGlobalScope => _currentScopeLevel == 0;
 
         public VariableType.ValueTypeEnum ExpectedReturnType
         {
@@ -119,8 +120,7 @@ namespace CMC
             for (var a = 0; a < ID.NestedIDs.Count; a++)
             {
                 UserCreatableID structName = ((VariableDeclarationStructVariableDeclaration) variableDeclaration).StructVariableDeclaration.StructName;
-                Struct @struct = ((DeclarationStruct) Lookup(structName, DeclarationType.STRUCT)).Struct;
-                VariableDeclaration variableDeclarationInsideStruct = @struct.VariableDeclarationList.VariableDeclarations.Find(x => x.Name.Spelling == ID.NestedIDs[a].Spelling);
+                VariableDeclaration variableDeclarationInsideStruct = ((VariableDeclarationStructVariableDeclaration) variableDeclaration).VariableDeclarations.Find(x => x.Name.Spelling == ID.NestedIDs[a].Spelling);
                 
                 string fullCurrentName = ID.GetFullName(a + 1);
                 if (variableDeclarationInsideStruct == null)

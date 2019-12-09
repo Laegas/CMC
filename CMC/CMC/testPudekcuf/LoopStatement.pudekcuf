@@ -1,0 +1,14 @@
+﻿booly g = aye;
+booly h = nay;
+
+function start takes nothing givesBack inty [
+
+    inty a = 1;
+	
+    loop (a is 5) is nay [
+        call print with a;
+        a = a + 1;
+    ]
+
+    giveBack 11;
+]

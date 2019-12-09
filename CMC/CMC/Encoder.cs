@@ -430,17 +430,17 @@ namespace CMC
 
         public object VisitStruct( Struct @struct, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitStructVariableDeclaration( StructVariableDeclaration structVariableDeclaration, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitVariableDeclarationList( VariableDeclarationList variableDeclarationList, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitVariableDeclarationSimple( VariableDeclarationSimple variableDeclarationSimple, object o )
@@ -459,7 +459,13 @@ namespace CMC
 
         public object VisitVariableDeclarationStructVariableDeclaration( VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o )
         {
-            throw new NotImplementedException();
+            variableDeclarationStructVariableDeclaration.StructVariableDeclaration.Visit(this);
+            foreach (VariableDeclaration variableDeclaration in variableDeclarationStructVariableDeclaration.VariableDeclarations)
+            {
+                variableDeclaration.Visit(this);
+            }
+
+            return null;
         }
     }
 }

@@ -1,14 +1,30 @@
-﻿booly g = aye;
-booly h = nay;
+﻿kebab SomeClass [
+    inty a;
+    inty b;
+    booly c;
+]
+
+kebab NestedClass [
+    inty a;
+    cook SomeClass b;
+]
+
+cook NestedClass hello;
 
 function start takes nothing givesBack inty [
 
-    inty a = 1;
-	
-    loop (a is 5) is nay [
-        call print with a;
-        a = a + 1;
-    ]
+    hello.a = 7;
+    
+    call print with hello.a;
+    
+    
+    hello.b.a = 32;
+    hello.b.b = 37;
+    hello.b.c = aye;
+    
+    call print with hello.b.a;
+    call print with hello.b.b;
+    call print with hello.b.c;
 
     giveBack 11;
 ]

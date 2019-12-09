@@ -91,6 +91,24 @@ namespace CMC
         public object VisitVariableDeclarationStructVariableDeclaration(VariableDeclarationStructVariableDeclaration variableDeclarationStructVariableDeclaration, object o)
         {
             variableDeclarationStructVariableDeclaration.StructVariableDeclaration.Visit(this);
+            idTable.Add(variableDeclarationStructVariableDeclaration.StructVariableDeclaration.VariableName, variableDeclarationStructVariableDeclaration, IDTable.DeclarationType.VARIABLE);
+            Struct @struct = ((DeclarationStruct)idTable.Lookup(variableDeclarationStructVariableDeclaration.StructVariableDeclaration.StructName, IDTable.DeclarationType.STRUCT)).Struct;
+            
+            variableDeclarationStructVariableDeclaration.VariableDeclarations = @struct.VariableDeclarationList.VariableDeclarations.Select<VariableDeclaration, VariableDeclaration>(variableDeclaration =>
+            {
+                if (variableDeclaration is VariableDeclarationSimple variableDeclarationSimple)
+                {
+                    return new VariableDeclarationSimple(variableDeclarationSimple.VariableType, variableDeclarationSimple.Name, variableDeclarationSimple.Expression)
+                    {
+                        Address = new Address(idTable.IsGlobalScope)
+                    };
+                }
+
+                var variableDeclarationStruct = (VariableDeclarationStructVariableDeclaration) variableDeclaration;
+                var newStructVariableDeclaration = new VariableDeclarationStructVariableDeclaration(new StructVariableDeclaration(variableDeclarationStruct.StructVariableDeclaration.StructName, variableDeclarationStruct.StructVariableDeclaration.VariableName));
+                newStructVariableDeclaration.Visit(this);
+                return newStructVariableDeclaration;
+            }).ToList();
             return null;
         }
 
@@ -448,8 +466,6 @@ namespace CMC
 
         public object VisitStructVariableDeclaration(StructVariableDeclaration structVariableDeclaration, object o)
         {
-            idTable.Add(structVariableDeclaration.VariableName, new VariableDeclarationStructVariableDeclaration(structVariableDeclaration), IDTable.DeclarationType.VARIABLE);
-            structVariableDeclaration.Struct = ((DeclarationStruct)idTable.Lookup(structVariableDeclaration.StructName, IDTable.DeclarationType.STRUCT)).Struct;
             return null;
         }
 

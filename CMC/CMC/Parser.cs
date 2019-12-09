@@ -29,13 +29,14 @@ namespace CMC
             {
                 case Token.TokenType.VARIABLE_TYPE: //varriable declaration
                 case Token.TokenType.USER_CREATABLE_ID:
+                case Token.TokenType.COOK:
                     return new DeclarationVariableDeclaration(ParseVariableDeclaration());
                 case Token.TokenType.FUNCTION: // function declaration
                     return new DeclarationFunctionDeclaration(ParseFunctionDeclaration());
                 case Token.TokenType.KEBAB: //struct
                     return new DeclarationStruct(ParseStruct());
                 default:
-                    throw VeryGenericException("Not valid declaration type");
+                    throw VeryGenericException("Not valid declaration type: " + _currentToken.TheTokenType);
             }
         }
 
@@ -225,7 +226,7 @@ namespace CMC
             var variableDeclarations = new List<VariableDeclaration>();
             while (
                 _currentToken.TheTokenType == Token.TokenType.VARIABLE_TYPE
-                || _currentToken.TheTokenType == Token.TokenType.USER_CREATABLE_ID
+                || _currentToken.TheTokenType == Token.TokenType.COOK
             )
                 variableDeclarations.Add(ParseVariableDeclaration());
 
