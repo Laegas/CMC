@@ -54,6 +54,7 @@
     public class PrimaryFunctionCall : Primary
     {
         public FunctionCall FunctionCall { get; }
+        public VariableDeclarationSimple VariableDeclarationSimple { get; set; }
 
         public PrimaryFunctionCall(FunctionCall functionCall)
         {

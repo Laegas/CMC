@@ -64,6 +64,9 @@ namespace CMC.AST
         public UserCreatableID VariableName { get; }
         public Expression1 Expression { get; }
 
+        /// <summary>
+        /// returns VariableName
+        /// </summary>
         public override UserCreatableID Name => VariableName;
 
         public VariableDeclarationSimple(VariableType variableType, UserCreatableID variableName,

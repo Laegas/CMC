@@ -1,0 +1,18 @@
+﻿function add takes inty a, inty b givesBack inty [
+	giveBack a+b;
+]
+
+function start takes nothing givesBack inty [
+	
+	# RUN THIS SHITTER, PRODUCED INTERESTING STUFF!!!
+
+	# decorate PrimaryFunctionCall with VariableDeclarationSimple
+
+	inty a = call add with 3, 4;
+	
+	call print with a;
+
+	call print with (call add with 4, 6);
+
+	giveBack 123;
+]

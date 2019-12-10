@@ -8,13 +8,8 @@ namespace CMC
     {
         private static void Main(string[] args)
         {
-            /*
-            Encoder.Testing();
-
-            return;
-            */
             File.Delete(@"combiled.TAM");
-            var sourceFile = new SourceFile(@"testPudekcuf/Debug.pudekcuf");
+            var sourceFile = new SourceFile(@"testPudekcuf/Functions.pudekcuf");
             //var scanner = new Scanner( sourceFile );
 
             var parser = new Parser(sourceFile);
@@ -24,22 +19,12 @@ namespace CMC
             Console.WriteLine(output);
             var checker = new SemanticCheckerAndDecorater();
 
-            program.Visit( checker ); // semantic checker and tree decorater
+            program.Visit( checker ); // semantic checker and tree decorator
             var encoder = new Encoder();
             encoder.Encode(program);
             encoder.SaveTargetProgram(AppContext.BaseDirectory + Encoder.FILE_NAME);
-            //var scanner = new Scanner(sourceFile);
-            //while( true )
-            //{
-            //    var token = scanner.ScanToken();
-            //    Console.WriteLine( token.TheTokenType  + token.Spelling);
-            //    if( Token.TokenType.END_OF_TEXT == token.TheTokenType )
-            //    {
-            //        break;
-            //    }
-            //}
-            Console.WriteLine("\n\nFinished parsing file");
 
+            Console.WriteLine("\n\nFinished combilation");
         }
     }
 }

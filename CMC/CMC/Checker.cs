@@ -76,7 +76,8 @@ namespace CMC
             }
             else
             {
-                var t1 = (VariableType.ValueTypeEnum) variableDeclarationSimple.Expression.Visit(this);
+                var declaration = idTable.Lookup(variableDeclarationSimple.Name, IDTable.DeclarationType.VARIABLE);
+                var t1 = (VariableType.ValueTypeEnum) variableDeclarationSimple.Expression.Visit(this, declaration);
                 var t2 = variableDeclarationSimple.VariableType.VariableType_;
 
                 if (t1 != t2)
@@ -143,11 +144,11 @@ namespace CMC
         {
             if (expression1.Operator1 == null)
             {
-                return expression1.Expression2.Visit(this);
+                return expression1.Expression2.Visit(this, o);
             }
 
-            var t1 = (VariableType.ValueTypeEnum) expression1.Expression2.Visit(this);
-            var t2 = (VariableType.ValueTypeEnum) expression1.Expression1_.Visit(this);
+            var t1 = (VariableType.ValueTypeEnum) expression1.Expression2.Visit(this, o);
+            var t2 = (VariableType.ValueTypeEnum) expression1.Expression1_.Visit(this, o);
 
             if (t1 != t2)
             {
@@ -167,14 +168,14 @@ namespace CMC
         {
             if (expression2.Operator2 == null)
             {
-                return expression2.Expression3.Visit(this);
+                return expression2.Expression3.Visit(this, o);
             }
 
 
             var lv2IntyOpr = new List<string>() {"+", "-"};
 
-            var t1 = (VariableType.ValueTypeEnum) expression2.Expression1.Visit(this);
-            var t2 = (VariableType.ValueTypeEnum) expression2.Expression3.Visit(this);
+            var t1 = (VariableType.ValueTypeEnum) expression2.Expression1.Visit(this, o);
+            var t2 = (VariableType.ValueTypeEnum) expression2.Expression3.Visit(this, o);
 
             if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
             {
@@ -216,14 +217,14 @@ namespace CMC
         {
             if (expression3.Operator3 == null)
             {
-                return expression3.Primary.Visit(this);
+                return expression3.Primary.Visit(this, o);
             }
 
 
             var lv3IntyOpr = new List<string>() {"*", "/"};
 
-            var t1 = (VariableType.ValueTypeEnum) expression3.Expression1.Visit(this);
-            var t2 = (VariableType.ValueTypeEnum) expression3.Primary.Visit(this);
+            var t1 = (VariableType.ValueTypeEnum) expression3.Expression1.Visit(this, o);
+            var t2 = (VariableType.ValueTypeEnum) expression3.Primary.Visit(this, o);
 
             if (t1 == VariableType.ValueTypeEnum.NOTHING || t2 == VariableType.ValueTypeEnum.NOTHING)
             {
@@ -263,11 +264,12 @@ namespace CMC
 
         public object VisitParameterList(ParameterList parameterList, object o)
         {
+            var i = parameterList.Parameters.Count;
             foreach (var item in parameterList.Parameters)
             {
-                item.Visit(this);
+                // will not work for structs; todo fix for structs in the future
+                item.Visit(this, -(i--));
             }
-
             return null;
         }
 
@@ -292,6 +294,11 @@ namespace CMC
 
         public object VisitPrimaryFunctionCall(PrimaryFunctionCall primaryFunctionCall, object o)
         {
+            if (o != null)
+            {
+                primaryFunctionCall.VariableDeclarationSimple = (VariableDeclarationSimple) o;
+            }
+
             return primaryFunctionCall.FunctionCall.Visit(this);
         }
 
@@ -440,7 +447,10 @@ namespace CMC
         //identifier already in the table
         public object VisitStatementAssignment(StatementAssignment statementAssignment, object o)
         {
-            VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this);
+            var ID = idTable.Lookup(statementAssignment.Identifier);
+            var declaration = idTable.Lookup(ID.Name, IDTable.DeclarationType.VARIABLE);
+
+            VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this, declaration);
             var variableDecSimple = (VariableDeclarationSimple) statementAssignment.Identifier.Visit(this);
 
             statementAssignment.IDsDeclaration = variableDecSimple;
@@ -473,6 +483,7 @@ namespace CMC
         {
             var decl = new VariableDeclarationSimple(parameter.ParameterType, parameter.ParameterName, null);
             idTable.Add(parameter.ParameterName, decl, IDTable.DeclarationType.VARIABLE);
+            decl.Address.Offset = (int)o;
             return null;
         }
 
@@ -483,7 +494,7 @@ namespace CMC
             idTable.EnterNestedScopeLevel();
             functionCall.ArgumentList.Visit(this, functionCall.FunctionDeclaration.FunctionDeclaration.ParameterList);
             idTable.ExitNestedScopeLevel();
-            return null;
+            return functionCall.FunctionDeclaration.FunctionDeclaration.ReturnType.ValueType;
         }
 
         /// <summary>

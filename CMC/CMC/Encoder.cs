@@ -246,7 +246,7 @@ namespace CMC
         {
             functionDeclaration.ParameterList.Visit(this);
             functionDeclaration.Statements.Visit(this, functionDeclaration);
-
+            
             return null;
         }
 
@@ -255,7 +255,7 @@ namespace CMC
             throw new NotImplementedException();
         }
 
-        public object VisitParameter( Parameter visitor, object o )
+        public object VisitParameter( Parameter parameter, object o )
         {
             return null;
         }
@@ -281,6 +281,23 @@ namespace CMC
         public object VisitPrimaryFunctionCall( PrimaryFunctionCall primaryFunctionCall, object o )
         {
             primaryFunctionCall.FunctionCall.Visit(this);
+
+            if (primaryFunctionCall.FunctionCall.FunctionDeclaration.FunctionDeclaration.ReturnType.ValueType !=
+                VariableType.ValueTypeEnum.NOTHING)
+            {
+                var returnSize = 1;
+                if (primaryFunctionCall.VariableDeclarationSimple == null)
+                {
+                    Emit(Machine.POPop, 0, 0, returnSize);
+                }
+                else
+                {
+                    Emit(Machine.STOREop, 1, 
+                        DisplayRegister(primaryFunctionCall.VariableDeclarationSimple.Address), 
+                        primaryFunctionCall.VariableDeclarationSimple.Address.Offset);
+                }
+            }
+
             return null;
         }
 

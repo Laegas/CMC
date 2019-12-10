@@ -1,0 +1,36 @@
+﻿kebab SomeClass [
+    inty a;
+    inty b;
+    booly c;
+]
+
+kebab NestedClass [
+    inty a;
+    cook SomeClass b;
+]
+
+cook NestedClass hello;
+
+function start takes nothing givesBack inty [
+
+    hello.a = 7;
+
+    call print with hello.a;
+    
+    hello.b.a = 32;
+    hello.b.b = 37;
+    hello.b.c = aye;
+    
+	inty a = hello.a + hello.b.b;
+	
+	call print with a; # 44
+	
+    call print with hello.b.a;
+    call print with hello.b.b;
+    call print with hello.b.c;
+
+	hello.b.b = hello.b.a + hello.a + hello.b.b;
+	call print with hello.b.b; # 76
+
+    giveBack 11;
+]

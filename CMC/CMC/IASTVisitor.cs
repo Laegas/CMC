@@ -16,7 +16,7 @@ namespace CMC
         object VisitExpression2(Expression2 expression2, object o);
         object VisitExpression3(Expression3 expression3, object o);
         object VisitParameterList(ParameterList parameterList, object o);
-        object VisitParameter( Parameter visitor, object o );
+        object VisitParameter( Parameter parameter, object o );
         object VisitPrimaryIdentifier(PrimaryIdentifier primaryIdentifier, object o);
         object VisitPrimaryBoolyLiteral(PrimaryBoolyLiteral primaryBoolyLiteral, object o);
         object VisitPrimaryIntyLiteral(PrimaryIntyLiteral primaryIntyLiteral, object o);

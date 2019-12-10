@@ -3,12 +3,40 @@ booly h = nay;
 
 function start takes nothing givesBack inty [
 
-    inty a = 1;
+    inty a = 3;
 	
-    loop (a is 5) is nay [
+    loop (a is 9) is nay [ # 3,5,7
         call print with a;
-        a = a + 1;
+        a = a + 2;
     ]
+
+	booly continue = aye;
+	a = 1;
+	loop continue [ # 1,2,3,4
+		call print with a;
+		a = a + 1;
+		if a is 5 [
+			continue = nay;
+		]
+	]
+
+	a = 1;
+	loop aye [ # 1,2,3,4
+		call print with a;
+		a = a + 1;
+		if a is 5 [
+			stopTheLoop;
+		]
+	]
+
+	a = 1;
+	loop nay [ # nothing
+		call print with a;
+		a = a + 1;
+		if a is 5 [
+			stopTheLoop;
+		]
+	]
 
     giveBack 11;
 ]
