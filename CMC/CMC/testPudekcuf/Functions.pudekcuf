@@ -1,26 +1,37 @@
-﻿#function printWithNothing takes nothing givesBack nothing[
-#	call print with 0-8;
-#	giveBack;
-#]
+﻿function printWithNothing takes nothing givesBack nothing[
+	call print with 0-8;
+	giveBack;
+]
 
-#function dontPrint takes nothing givesBack nothing[
-#	giveBack;
-#	call print with 0-9;
-#]
+function dontPrint takes nothing givesBack nothing[
+	giveBack;
+	call print with 0-9;
+]
 
 function changer takes inty a givesBack nothing[
 	a = 0-1;
 	call print with a;
+	#giveBack;
+]
+
+function printif takes booly yes, inty value givesBack nothing[
+
+	if yes [
+		call print with value;
+	]
 ]
 
 function start takes nothing givesBack inty [
-	################## this gives interesting result #############
-	#call printWithNothing with nothing; # should print -8
-	#call dontPrint with nothing; # should not print
+	
+	call printWithNothing with nothing; # should print -8
+	call dontPrint with nothing; # should not print
 	
 	inty a = 5;
 	call changer with a; # should print -1
 	call print with a; # should print 5
+
+	call printif with aye, 9; # should print 9
+	call printif with nay, 13; # should not print anything
 
 	giveBack 122;
 ]

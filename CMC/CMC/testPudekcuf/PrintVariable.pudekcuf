@@ -5,15 +5,15 @@ inty c = 13;
 function start takes nothing givesBack inty [
 	inty b = 7;
 
-	call print with a;
-	call print with b;
+	call print with a; # should print 5
+	call print with b; # should print 7
 
 	a = 9;
 
-	call print with a;
+	call print with a; # should print 9
 	
 	a = c;
-	call print with a;
+	call print with a; # should print 13
 
     giveBack 11;
 ]

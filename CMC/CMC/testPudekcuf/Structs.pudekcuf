@@ -13,24 +13,24 @@ cook NestedClass hello;
 
 function start takes nothing givesBack inty [
 
-    hello.a = 7;
+	hello.a = 7;
 
-    call print with hello.a;
+    	call print with hello.a; # should print 7
     
-    hello.b.a = 32;
-    hello.b.b = 37;
-    hello.b.c = aye;
+    	hello.b.a = 32;
+    	hello.b.b = 37;
+    	hello.b.c = aye;
     
 	inty a = hello.a + hello.b.b;
 	
-	call print with a; # 44
+	call print with a; # should print 44
 	
-    call print with hello.b.a;
-    call print with hello.b.b;
-    call print with hello.b.c;
+    	call print with hello.b.a; # should print 32
+    	call print with hello.b.b; # should print 37
+    	call print with hello.b.c; # should print 1
 
 	hello.b.b = hello.b.a + hello.a + hello.b.b;
-	call print with hello.b.b; # 76
+	call print with hello.b.b;  # should print 76
 
-    giveBack 11;
+    	giveBack 11;
 ]

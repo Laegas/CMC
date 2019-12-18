@@ -129,6 +129,11 @@ namespace CMC
 
         public object VisitFunctionDeclaration(FunctionDeclaration functionDeclaration, object o)
         {
+            if(functionDeclaration.ReturnType.ValueType == VariableType.ValueTypeEnum.NOTHING)
+            {
+                functionDeclaration.Statements.Statements_.Add(new StatementGiveBack(null));
+            }
+
             idTable.EnterNestedScopeLevel(functionDeclaration.ReturnType.ValueType);
 
             functionDeclaration.ParameterList.Visit(this);
@@ -309,21 +314,31 @@ namespace CMC
 
         private void DeclareSTD()
         {
-            var parameterList = new ParameterList(new List<Parameter>());
-            parameterList.Parameters.Add(new Parameter(
+            //adding standard function print to the enviornment
+            var parameterList1 = new ParameterList(new List<Parameter>());
+            parameterList1.Parameters.Add(new Parameter(
                     new VariableType(VariableType.ValueTypeEnum.ANY),
                     new UserCreatableID(new Token("blah" /* doesn't matter */, Token.TokenType.USER_CREATABLE_ID))));
-
             var printFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
                 new UserCreatableID(new Token("print", Token.TokenType.USER_CREATABLE_ID)),
-                parameterList,
+                parameterList1,
                 new ReturnTypeNothing(), 
                 new Statements(new List<Statement>())
             ));
-
             Encoder.printFunction = printFunc;
-
             idTable.Add(printFunc.FunctionDeclaration.FunctionName, printFunc, IDTable.DeclarationType.FUNCTION);
+
+
+            ////adding standard function tnirp to the enviornment
+            //var parameterList2 = new ParameterList(new List<Parameter>());
+            //var tnirpFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
+            //    new UserCreatableID(new Token("tnirp", Token.TokenType.USER_CREATABLE_ID)),
+            //    parameterList2,
+            //    new ReturnTypeVariableType(new VariableType(VariableType.ValueTypeEnum.INTY)),
+            //    new Statements(new List<Statement>())
+            //));
+            //Encoder.tnirpFunction = tnirpFunc;
+            //idTable.Add(tnirpFunc.FunctionDeclaration.FunctionName, tnirpFunc, IDTable.DeclarationType.FUNCTION);
         }
 
         public object VisitProgram(AST.Program program, object o)
@@ -434,6 +449,9 @@ namespace CMC
                 statement.Visit(this, o);
             }
 
+
+            
+
             return null;
         }
 
@@ -447,10 +465,11 @@ namespace CMC
         //identifier already in the table
         public object VisitStatementAssignment(StatementAssignment statementAssignment, object o)
         {
-            var ID = idTable.Lookup(statementAssignment.Identifier);
-            var declaration = idTable.Lookup(ID.Name, IDTable.DeclarationType.VARIABLE);
+            var variableDeclarationSimple = idTable.Lookup(statementAssignment.Identifier);
 
-            VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this, declaration);
+            //var declaration = idTable.Lookup(variableDeclarationSimple.Name, IDTable.DeclarationType.VARIABLE);
+
+            VariableType.ValueTypeEnum expressionType = (VariableType.ValueTypeEnum) statementAssignment.Expression.Visit(this, variableDeclarationSimple);
             var variableDecSimple = (VariableDeclarationSimple) statementAssignment.Identifier.Visit(this);
 
             statementAssignment.IDsDeclaration = variableDecSimple;

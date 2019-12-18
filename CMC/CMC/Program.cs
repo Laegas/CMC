@@ -1,28 +1,48 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace CMC
 {
     internal class Program
     {
+        const bool compileAll = true;
         private static void Main(string[] args)
         {
-            File.Delete(@"combiled.TAM");
-            var sourceFile = new SourceFile(@"testPudekcuf/Functions.pudekcuf");
-            //var scanner = new Scanner( sourceFile );
 
-            var parser = new Parser(sourceFile);
-            var program = parser.ParseProgram();
-            var output = JsonConvert.SerializeObject(program, Formatting.Indented);
+            var files = Directory.GetFiles(AppContext.BaseDirectory + "/compiled");
 
-            Console.WriteLine(output);
-            var checker = new SemanticCheckerAndDecorater();
+            files.ToList().ForEach(item => {
+                if (item.Contains(".TAM"))
+                    File.Delete(item);
+            });
 
-            program.Visit( checker ); // semantic checker and tree decorator
-            var encoder = new Encoder();
-            encoder.Encode(program);
-            encoder.SaveTargetProgram(AppContext.BaseDirectory + Encoder.FILE_NAME);
+            string[] pudekcufFiles = { AppContext.BaseDirectory + "testPudekcuf/Debug.pudekcuf"};
+            if (compileAll)
+            {
+                pudekcufFiles = Directory.GetFiles("testPudekcuf");
+            }
+
+            foreach (var path in pudekcufFiles)
+            {
+                var sourceFile = new SourceFile(path);
+                //var scanner = new Scanner( sourceFile );
+
+                var parser = new Parser(sourceFile);
+                var program = parser.ParseProgram();
+                var output = JsonConvert.SerializeObject(program, Formatting.Indented);
+
+                Console.WriteLine(output);
+                var checker = new SemanticCheckerAndDecorater();
+
+                program.Visit(checker); // semantic checker and tree decorator
+                var encoder = new Encoder();
+                encoder.Encode(program);
+                encoder.SaveTargetProgram(AppContext.BaseDirectory + @"/compiled/" + Path.GetFileName(path) + ".TAM");
+            }
+
+           
 
             Console.WriteLine("\n\nFinished combilation");
         }

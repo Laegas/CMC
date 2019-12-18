@@ -4,30 +4,50 @@ booly h = nay;
 
 function start takes nothing givesBack inty [
 	
-	if aye [
+	if aye [ # should print 21
 		call print with 21;
 	]
 
-	if nay [
+	if nay [# should not print 
 		call print with 22;
 	]
 
 	booly a = aye;
 	booly b = nay;
 
-	call print with a;
-	call print with b;
+	call print with a; # should print 1
+	call print with b; # should print 0
 	
-	call print with g;
-	call print with h;
+	call print with g; # should print 1
+	call print with h; # should print 0
 
-	if a [
+	if a [ # should print 23
 		call print with 23;
 	]
 
-	if 2 is 2 [
+	if 2 is 2 [ # should print 22
+		call print with 22;
+	]
+
+	if aye or nay [ # should print 24
 		call print with 24;
 	]
 
-    giveBack 11;
+	if nay or aye [ # should print 26
+		call print with 26;
+	]
+
+	if aye and aye [ # should print 74
+		call print with 74;
+	]
+
+	if nay and nay [ # should not print
+		call print with 84;
+	]
+	
+	if aye and nay [ # should not print
+		call print with 94;
+	]   
+	giveBack 0;
+	
 ]

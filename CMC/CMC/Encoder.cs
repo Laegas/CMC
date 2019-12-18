@@ -14,6 +14,7 @@ namespace CMC
 
         // Standard environment
         public static DeclarationFunctionDeclaration printFunction;
+        public static DeclarationFunctionDeclaration tnirpFunction;
 
         
         private void Emit( int op, int n, int r, int d ) // from Jan
@@ -322,20 +323,35 @@ namespace CMC
 
         private void DefineSTD()
         {
+
+
+            //generating code for print function of the STD enviornment
             var savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, -1);
-//            _stackManager.IncrementFrameLevel();
             printFunction.FunctionDeclaration.Address.Offset = nextAdr;
-
             Emit(Machine.LOADop, 1, Machine.LBr, -1);
             Emit(Machine.CALLop, 0, Machine.PBr, Machine.putintDisplacement);
             _stackManager.DecrementOffset();
             Emit( Machine.CALLop, 0, Machine.PBr, Machine.puteolDisplacement );
-            // Because return statement is not in our source code.
             Emit(Machine.RETURNop, 0, 0, 1);
-//            _stackManager.DecrementFrameLevel();
-
             Patch(savedAddr, nextAdr);
+
+
+            //Emit(Machine.PUSHop, 0, 0, 1); // used for tnirp
+            //var savedStackPosition = _stackManager.CurrentOffset - 1;
+
+            ////generating code for tnirp function of the STD enviornment
+            //savedAddr = nextAdr;
+            //Emit(Machine.JUMPop, 0, Machine.CBr, -1);
+            //tnirpFunction.FunctionDeclaration.Address.Offset = nextAdr;
+            //Emit(Machine.LOADLop, 0, 0, savedStackPosition); // addess of where to store int from getint into. //// subcommen
+            //Emit(Machine.CALLop, 0, Machine.PBr, Machine.getintDisplacement);
+            //Emit(Machine.CALLop, 0, Machine.PBr, Machine.geteolDisplacement);
+            //Emit(Machine.RETURNop, 1, 0, 0);
+            //Patch(savedAddr, nextAdr);
+
+
+
         }
 
         public object VisitProgram( AST.Program program, object o )
