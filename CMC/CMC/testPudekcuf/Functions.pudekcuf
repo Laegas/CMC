@@ -1,32 +1,12 @@
-﻿function add takes inty a, inty b givesBack inty[
-	giveBack a + b;
-]
+﻿#function printWithNothing takes nothing givesBack nothing[
+#	call print with 0-8;
+#	giveBack;
+#]
 
-function fib takes inty number givesBack inty [
-	
-	if (number is 0) or (number is (0-1))[
-		giveBack 0;
-	]
-		
-	if (number is 1)  [
-		giveBack 1;
-	]
-	
-	giveBack (call add with (call fib with (number - 1)), (call fib with (number - 2)));
-]
-
-
-function printWithNothing takes nothing givesBack nothing[
-	
-	call print with 0-8;
-
-	giveBack;
-]
-
-function dontPrint takes nothing givesBack nothing[
-	giveBack;
-	call print with 0-9;
-]
+#function dontPrint takes nothing givesBack nothing[
+#	giveBack;
+#	call print with 0-9;
+#]
 
 function changer takes inty a givesBack nothing[
 	a = 0-1;
@@ -35,18 +15,14 @@ function changer takes inty a givesBack nothing[
 
 function start takes nothing givesBack inty [
 	################## this gives interesting result #############
-	call printWithNothing with nothing; # should print -8
-	call dontPrint with nothing; # should not print
+	#call printWithNothing with nothing; # should print -8
+	#call dontPrint with nothing; # should not print
 	
 	inty a = 5;
 	call changer with a; # should print -1
 	call print with a; # should print 5
 
-	inty f = call fib with 12;
-	call print with f; # expecting 144 when f is 12
-
 	giveBack 122;
-
 ]
 
 
