@@ -25,7 +25,7 @@ namespace CMC
         public void DecrementFrameLevel()
         {
             _currentFrameLevel--;
-            offsets.Remove(offsets.Count - 1);
+            offsets.RemoveAt(_currentFrameLevel);
         }
 
         public void IncrementOffset(int delta = 1)

@@ -236,9 +236,13 @@ namespace CMC
         public object VisitFunctionCall( FunctionCall functionCall, object o )
         {
             functionCall.ArgumentList.Visit(this);
-
             Emit( Machine.CALLop, 0 ,Machine.CBr, functionCall.FunctionDeclaration.FunctionDeclaration.Address.Offset);
             _stackManager.DecrementOffset(functionCall.FunctionDeclaration.FunctionDeclaration.ParameterList.Parameters.Count);
+            
+            if(functionCall.FunctionDeclaration.FunctionDeclaration.ReturnType.ValueType != VariableType.ValueTypeEnum.NOTHING)
+            {
+                _stackManager.IncrementOffset();
+            }
             return null;
         }
 
@@ -288,13 +292,14 @@ namespace CMC
                 var returnSize = 1;
                 if (primaryFunctionCall.VariableDeclarationSimple == null)
                 {
-                    Emit(Machine.POPop, 0, 0, returnSize);
+                    //Emit(Machine.POPop, 0, 0, returnSize);
+                    //leave it on the stack, this case i probaly because the return value of a function call is being passed to another function.
                 }
                 else
                 {
-                    Emit(Machine.STOREop, 1, 
-                        DisplayRegister(primaryFunctionCall.VariableDeclarationSimple.Address), 
-                        primaryFunctionCall.VariableDeclarationSimple.Address.Offset);
+                    //Emit(Machine.STOREop, 1, 
+                    //    DisplayRegister(primaryFunctionCall.VariableDeclarationSimple.Address), 
+                    //    primaryFunctionCall.VariableDeclarationSimple.Address.Offset);
                 }
             }
 
@@ -385,7 +390,9 @@ namespace CMC
             {
                 statementGiveBack.Expression.Visit(this);
                 Emit(Machine.RETURNop, 1, 0, parametersSize);
+                _stackManager.DecrementOffset();
             }
+
 
             return null;
         }
