@@ -329,16 +329,16 @@ namespace CMC
             idTable.Add(printFunc.FunctionDeclaration.FunctionName, printFunc, IDTable.DeclarationType.FUNCTION);
 
 
-            ////adding standard function tnirp to the enviornment
-            //var parameterList2 = new ParameterList(new List<Parameter>());
-            //var tnirpFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
-            //    new UserCreatableID(new Token("tnirp", Token.TokenType.USER_CREATABLE_ID)),
-            //    parameterList2,
-            //    new ReturnTypeVariableType(new VariableType(VariableType.ValueTypeEnum.INTY)),
-            //    new Statements(new List<Statement>())
-            //));
-            //Encoder.tnirpFunction = tnirpFunc;
-            //idTable.Add(tnirpFunc.FunctionDeclaration.FunctionName, tnirpFunc, IDTable.DeclarationType.FUNCTION);
+            //adding standard function tnirp to the enviornment
+            var parameterList2 = new ParameterList(new List<Parameter>());
+            var tnirpFunc = new DeclarationFunctionDeclaration(new FunctionDeclaration(
+                new UserCreatableID(new Token("tnirp", Token.TokenType.USER_CREATABLE_ID)),
+                parameterList2,
+                new ReturnTypeVariableType(new VariableType(VariableType.ValueTypeEnum.INTY)),
+                new Statements(new List<Statement>())
+            ));
+            Encoder.tnirpFunction = tnirpFunc;
+            idTable.Add(tnirpFunc.FunctionDeclaration.FunctionName, tnirpFunc, IDTable.DeclarationType.FUNCTION);
         }
 
         public object VisitProgram(AST.Program program, object o)

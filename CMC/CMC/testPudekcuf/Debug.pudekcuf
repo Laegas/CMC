@@ -2,7 +2,7 @@
 
 	inty a = 1;
 	
-	#a = call tnirp with nothing;
+	a = call tnirp with nothing;
 	call print with a;
 	
 	giveBack 0;
