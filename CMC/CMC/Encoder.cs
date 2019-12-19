@@ -257,7 +257,7 @@ namespace CMC
 
         public object VisitIdentifier( Identifier identifier, object o )
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public object VisitParameter( Parameter parameter, object o )
@@ -286,23 +286,6 @@ namespace CMC
         public object VisitPrimaryFunctionCall( PrimaryFunctionCall primaryFunctionCall, object o )
         {
             primaryFunctionCall.FunctionCall.Visit(this);
-
-            if (primaryFunctionCall.FunctionCall.FunctionDeclaration.FunctionDeclaration.ReturnType.ValueType !=
-                VariableType.ValueTypeEnum.NOTHING)
-            {
-                var returnSize = 1;
-                if (primaryFunctionCall.VariableDeclarationSimple == null)
-                {
-                    //Emit(Machine.POPop, 0, 0, returnSize);
-                    //leave it on the stack, this case i probaly because the return value of a function call is being passed to another function.
-                }
-                else
-                {
-                    //Emit(Machine.STOREop, 1, 
-                    //    DisplayRegister(primaryFunctionCall.VariableDeclarationSimple.Address), 
-                    //    primaryFunctionCall.VariableDeclarationSimple.Address.Offset);
-                }
-            }
 
             return null;
         }
