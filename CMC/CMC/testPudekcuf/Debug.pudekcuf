@@ -1,10 +1,3 @@
 ﻿function start takes nothing givesBack inty[
-
-	call print with (call tnirp with nothing);
-
-	call print with (call tnirp with nothing);
-
-	call print with (call tnirp with nothing);
-
 	giveBack 0;
 ]

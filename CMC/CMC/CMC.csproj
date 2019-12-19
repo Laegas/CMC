@@ -10,6 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="testPudekcuf\ConsoleRead.pudekcuf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testPudekcuf\Functions_Fibonnaci.pudekcuf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

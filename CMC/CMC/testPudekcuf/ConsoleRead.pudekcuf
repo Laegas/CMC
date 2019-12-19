@@ -1,0 +1,9 @@
+﻿function start takes nothing givesBack inty[
+
+	call print with (call tnirp with nothing);
+
+	inty a = call tnirp with nothing;
+	call print with (a * a);
+
+	giveBack 0;
+]

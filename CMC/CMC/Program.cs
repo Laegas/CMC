@@ -10,14 +10,16 @@ namespace CMC
         const bool compileAll = true;
         private static void Main(string[] args)
         {
+            var compiledPath = AppContext.BaseDirectory + "/compiled";
+            Directory.CreateDirectory(compiledPath);
 
-            var files = Directory.GetFiles(AppContext.BaseDirectory + "/compiled");
+            var files = Directory.GetFiles(compiledPath);
 
             files.ToList().ForEach(item => {
                 if (item.Contains(".TAM"))
                     File.Delete(item);
             });
-
+            
             string[] pudekcufFiles = { AppContext.BaseDirectory + "testPudekcuf/Debug.pudekcuf"};
             if (compileAll)
             {
