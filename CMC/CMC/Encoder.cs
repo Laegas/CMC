@@ -336,24 +336,17 @@ namespace CMC
             Emit(Machine.RETURNop, 0, 0, 1);
             Patch(savedAddr, nextAdr);
 
-
-
             //generating code for tnirp function of the STD enviornment
             savedAddr = nextAdr;
             Emit(Machine.JUMPop, 0, Machine.CBr, -1);
             tnirpFunction.FunctionDeclaration.Address.Offset = nextAdr;
-            //Emit(Machine.PUSHop, 0, 0, 1); // used for tnirp
-            Emit(Machine.LOADLop, 0, 0, 5); 
-            Emit(Machine.LOADLop, 0, 0,3); // addess of where to store int from getint into. //// subcommen
+            Emit(Machine.PUSHop, 0, 0, 1); // used for tnirp
+            Emit(Machine.LOADAop, 0, Machine.LBr,3); // addess of where to store int from getint into. //// subcommen
             Emit(Machine.CALLop, 0, Machine.PBr, Machine.getintDisplacement);
-            //Emit(Machine.CALLop, 0, Machine.PBr, Machine.geteolDisplacement);
             Emit(Machine.RETURNop, 1, 0, 0);
             _stackManager.DecrementOffset();// this is a hack
             _stackManager.DecrementOffset();// this is a hack
             Patch(savedAddr, nextAdr);
-
-
-
         }
 
         public object VisitProgram( AST.Program program, object o )
